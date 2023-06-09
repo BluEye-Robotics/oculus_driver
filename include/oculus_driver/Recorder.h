@@ -6,7 +6,10 @@
 #include <chrono>
 #include <sstream>
 
+#include <spdlog/spdlog.h>
+
 #include <oculus_driver/OculusMessage.h>
+
 
 namespace oculus {
 
@@ -132,6 +135,9 @@ class Recorder
     std::string           filename_;
     mutable std::ofstream file_;
 
+    // logging
+    spdlog::logger logger;
+
     public:
 
     Recorder();
@@ -170,6 +176,9 @@ class FileReader
 
     Message::Ptr message_;
 
+    // logging
+    spdlog::logger logger;
+
     void read_next_header() const;
 
     public:
@@ -201,5 +210,3 @@ class FileReader
 } // namespace oculus
 
 #endif //_DEF_OCULUS_DRIVER_RECORDER_H_
-
-

@@ -19,12 +19,14 @@
 #include <oculus_driver/AsyncService.h>
 
 #include <boost/bind.hpp>
+#include <spdlog/spdlog.h>
 
 namespace oculus {
 
 AsyncService::AsyncService() :
     service_(std::make_unique<IoService>()),
-    isRunning_(false)
+    isRunning_(false),
+    logger("oculus::AsyncService")
 {}
 
 AsyncService::~AsyncService()
@@ -45,7 +47,7 @@ bool AsyncService::is_running() const
 void AsyncService::start()
 {
     if(this->is_running()) return;
-    std::cout << "starting" << std::endl;
+    logger.info("starting");
 
     if(service_->stopped())
         service_->reset();
@@ -61,7 +63,8 @@ void AsyncService::stop()
 {
     if(!this->is_running()) return;
 
-    std::cout << "stopping" << std::endl;
+
+    logger.info("stopping");
     
     service_->stop();
     thread_.join();
@@ -70,7 +73,7 @@ void AsyncService::stop()
 
     isRunning_ = false;
 
-    std::cout << "stopped" << std::endl;
+    logger.info("stopped");
 }
 
 } //namespace oculus

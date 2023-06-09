@@ -1,14 +1,17 @@
 #include <oculus_driver/Recorder.h>
 #include <oculus_driver/print_utils.h>
 
+
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 namespace oculus {
 
-Recorder::Recorder()
+Recorder::Recorder() : 
+    logger("oculus::Recorder")
 {}
 
-Recorder::~Recorder()
+Recorder::~Recorder() 
 {
     if(this->is_open()) {
         this->close();
@@ -88,7 +91,8 @@ std::size_t Recorder::write(const Message& message) const
 
 FileReader::FileReader(const std::string& filename) :
     itemPosition_(0),
-    message_(new Message())
+    message_(new Message()),
+    logger("oculus::FileReader")
 {
     std::memset(&nextItem_, 0, sizeof(nextItem_));
     this->open(filename);
@@ -110,7 +114,8 @@ bool FileReader::check_file_header(const blueprint::LogHeader& header)
         throw std::runtime_error(oss.str());
     }
     if(header.version != 1) {
-        std::cerr << "oculus::FileHeader version is != 1. Reaingd may fail" << std::endl;
+        logger.error("oculus::FileHeader version is != 1. Reaingd may fail");
+
     }
     if(header.encryption != 0) {
         std::ostringstream oss;
@@ -253,4 +258,3 @@ PingMessage::ConstPtr FileReader::read_next_ping() const
 }
 
 } //namespace oculus
-

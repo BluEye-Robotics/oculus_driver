@@ -2,3 +2,4 @@
 build
 *.oculus
 *.mp4
+.vscode

@@ -20,12 +20,15 @@
 #define _DEF_OCULUS_DRIVER_STATUS_LISTENER_H_
 
 #include <iostream>
+#include <memory>
 
 #include <boost/asio.hpp>
+#include <spdlog/spdlog.h>
 
 #include <oculus_driver/Oculus.h>
 #include <oculus_driver/CallbackQueue.h>
 #include <oculus_driver/Clock.h>
+
 
 namespace oculus {
 
@@ -48,6 +51,8 @@ class StatusListener
     OculusStatusMsg msg_;
     Callbacks       callbacks_;
     Clock           clock_;
+
+    spdlog::logger logger;
 
     public:
 

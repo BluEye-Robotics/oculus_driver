@@ -6,6 +6,8 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/DefaultBuildType.cmake)
 
 find_package(Boost COMPONENTS system thread REQUIRED)
 
+find_package(spdlog REQUIRED)
+
 add_library(oculus_driver SHARED
     src/print_utils.cpp
     src/StatusListener.cpp
@@ -25,6 +27,7 @@ target_include_directories(oculus_driver PUBLIC
 target_link_libraries(oculus_driver PUBLIC
     Boost::system
     Boost::thread
+    spdlog::spdlog
 )
 target_compile_features(oculus_driver PUBLIC cxx_std_17)
 
@@ -74,5 +77,3 @@ export(EXPORT ${PROJECT_NAME}Targets
 if(BUILD_TESTS)
     add_subdirectory(tests)
 endif()
-
-

@@ -19,11 +19,15 @@
 #ifndef _DEF_OCULUS_DRIVER_ASYNC_SERVICE_H_
 #define _DEF_OCULUS_DRIVER_ASYNC_SERVICE_H_
 
+#include <spdlog/spdlog.h>
+
 #include <iostream>
 #include <thread>
 #include <memory>
 
 #include <boost/asio.hpp>
+
+
 
 namespace oculus {
 
@@ -39,6 +43,9 @@ class AsyncService
     IoServicePtr service_;
     std::thread  thread_;
     bool         isRunning_;
+
+
+    spdlog::logger logger;
 
     public:
 

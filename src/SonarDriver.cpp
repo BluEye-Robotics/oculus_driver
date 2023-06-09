@@ -18,6 +18,8 @@
 
 #include <oculus_driver/SonarDriver.h>
 
+#include <spdlog/spdlog.h>
+
 namespace oculus {
 
 SonarDriver::SonarDriver(const IoServicePtr& service,
@@ -43,8 +45,7 @@ bool SonarDriver::send_ping_config(PingConfig config)
     
     auto bytesSent = this->send(buf);
     if(bytesSent != sizeof(config)) {
-        std::cerr << "Could not send whole fire message(" << bytesSent
-                  << "/" << sizeof(config) << ")" << std::endl;
+        logger.error("Could not send whole fire message({}/{})", bytesSent, sizeof(config));
         return false;
     }
 
@@ -104,17 +105,17 @@ SonarDriver::PingConfig SonarDriver::request_ping_config(PingConfig request)
                     break;
             }
             catch(const Timeout& e) {
-                std::cerr << "Timeout reached while requesting config" << std::endl;
+                logger.error("Timeout reached while requesting config");
                 continue;
             }
         }
         count++;
     } while(count < maxCount);
-    //std::cout << "Count is : " << count << std::endl << std::flush;
+    //logger.info("Count is : {}", count);
 
     if(count >= maxCount) {
-        std::cerr << "Could not get a proper feedback from the sonar."
-                  << "Assuming the configuration is ok (fix this)" << std::endl;
+        logger.warn("Could not get a proper feedback from the sonar."
+                    "Assuming the configuration is ok (fix this)");
         feedback = request;
         feedback.head.msgId = 0; // invalid, will be checkable.
     }
@@ -197,13 +198,13 @@ void SonarDriver::handle_message(const Message::ConstPtr& message)
             dummyCallbacks_.call(header);
             break;
         case messageSimpleFire:
-            std::cerr << "messageSimpleFire parsing not implemented." << std::endl;
+            logger.error("messageSimpleFire parsing not implemented.");
             break;
         case messagePingResult:
-            std::cerr << "messagePingResult parsing not implemented." << std::endl;
+            logger.error("messagePingResult parsing not implemented.");
             break;
         case messageUserConfig:
-            std::cerr << "messageUserConfig parsing not implemented." << std::endl;
+            logger.error("messageUserConfig parsing not implemented.");
             break;
         default:
             break;
@@ -290,4 +291,3 @@ unsigned int SonarDriver::add_config_callback(const ConfigCallback& callback)
 }
 
 } //namespace oculus
-

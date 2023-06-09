@@ -18,6 +18,8 @@
 
 #include <oculus_driver/StatusListener.h>
 
+#include <spdlog/spdlog.h>
+
 namespace oculus {
 
 using namespace std::placeholders;
@@ -25,7 +27,8 @@ using namespace std::placeholders;
 StatusListener::StatusListener(const IoServicePtr& service,
                                unsigned short listeningPort) :
     socket_(*service),
-    remote_(boost::asio::ip::address_v4::any(), listeningPort)
+    remote_(boost::asio::ip::address_v4::any(), listeningPort),
+    logger("oculus::StatusListener")
 {
     boost::system::error_code err;
     socket_.open(boost::asio::ip::udp::v4(), err);
@@ -38,7 +41,10 @@ StatusListener::StatusListener(const IoServicePtr& service,
     if(err)
         throw std::runtime_error("oculus::StatusListener : Socket remote error");
 
-    std::cout << "oculus::StatusListener : listening to remote : " << remote_ << std::endl;
+    std::stringstream ss;
+    ss << remote_;
+    logger.info("listening to remote : {}", ss.str()); 
+
     this->get_one_message();
 }
 
@@ -70,20 +76,19 @@ void StatusListener::message_callback(const boost::system::error_code& err,
                                       std::size_t bytesReceived)
 {
     if(err) {
-        std::cerr << "oculus::StatusListener::read_callback : Status reception error.\n";
+        logger.error("read_callback : Status reception error : {}", err.message());
         this->get_one_message();
         return;
     }
 
     if(bytesReceived != sizeof(OculusStatusMsg)) {
-        std::cerr << "oculus::StatusListener::read_callback : not enough bytes.\n";
+        logger.error("read_callback : not enough bytes");
         this->get_one_message();
         return;
     }
     
     // we are clean here
     clock_.reset();
-    //std::cout << msg_ << std::endl;
     callbacks_.call(msg_);
     this->get_one_message();
 }

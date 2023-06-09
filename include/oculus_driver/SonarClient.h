@@ -30,6 +30,7 @@
 #include <type_traits>
 
 #include <boost/asio.hpp>
+#include <spdlog/spdlog.h>
 
 #include <oculus_driver/Oculus.h>
 #include <oculus_driver/utils.h>
@@ -87,6 +88,9 @@ class SonarClient
     unsigned int   statusCallbackId_;
 
     Message::Ptr message_;
+
+    // Logging
+    spdlog::logger logger;
 
     // helper stubs
     void checker_callback(const boost::system::error_code& err);

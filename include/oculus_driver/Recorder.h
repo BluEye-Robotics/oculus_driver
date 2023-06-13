@@ -135,8 +135,7 @@ class Recorder
     std::string           filename_;
     mutable std::ofstream file_;
 
-    // logging
-    spdlog::logger logger;
+    spdlog::logger logger = spdlog::logger("oculus::Recorder");
 
     public:
 
@@ -176,8 +175,7 @@ class FileReader
 
     Message::Ptr message_;
 
-    // logging
-    spdlog::logger logger;
+    spdlog::logger logger = spdlog::logger("oculus::FileReader");
 
     void read_next_header() const;
 

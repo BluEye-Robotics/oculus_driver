@@ -44,8 +44,7 @@ class AsyncService
     std::thread  thread_;
     bool         isRunning_;
 
-
-    spdlog::logger logger;
+    spdlog::logger logger = spdlog::logger("oculus::AsyncService");
 
     public:
 

@@ -25,8 +25,7 @@ namespace oculus {
 
 AsyncService::AsyncService() :
     service_(std::make_unique<IoService>()),
-    isRunning_(false),
-    logger("oculus::AsyncService")
+    isRunning_(false)
 {}
 
 AsyncService::~AsyncService()

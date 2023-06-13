@@ -39,8 +39,7 @@ SonarClient::SonarClient(const IoServicePtr& service,
     //statusCallbackId_(0),
     //data_(0)
     statusCallbackId_(0),
-    message_(Message::Create()),
-    logger("oculus::SonarClient")
+    message_(Message::Create())
 {
     this->checkerTimer_.async_wait(
         std::bind(&SonarClient::checker_callback, this, std::placeholders::_1));

@@ -27,8 +27,7 @@ using namespace std::placeholders;
 StatusListener::StatusListener(const IoServicePtr& service,
                                unsigned short listeningPort) :
     socket_(*service),
-    remote_(boost::asio::ip::address_v4::any(), listeningPort),
-    logger("oculus::StatusListener")
+    remote_(boost::asio::ip::address_v4::any(), listeningPort)
 {
     boost::system::error_code err;
     socket_.open(boost::asio::ip::udp::v4(), err);

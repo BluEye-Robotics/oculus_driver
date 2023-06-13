@@ -91,8 +91,7 @@ std::size_t Recorder::write(const Message& message) const
 
 FileReader::FileReader(const std::string& filename) :
     itemPosition_(0),
-    message_(new Message()),
-    logger("oculus::FileReader")
+    message_(new Message())
 {
     std::memset(&nextItem_, 0, sizeof(nextItem_));
     this->open(filename);

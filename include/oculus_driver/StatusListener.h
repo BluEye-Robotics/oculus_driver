@@ -52,7 +52,7 @@ class StatusListener
     Callbacks       callbacks_;
     Clock           clock_;
 
-    spdlog::logger logger;
+    spdlog::logger logger = spdlog::logger("oculus::StatusListener");
 
     public:
 

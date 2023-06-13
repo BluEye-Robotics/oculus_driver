@@ -89,8 +89,7 @@ class SonarClient
 
     Message::Ptr message_;
 
-    // Logging
-    spdlog::logger logger;
+    spdlog::logger logger = spdlog::logger("oculus::SonarClient");
 
     // helper stubs
     void checker_callback(const boost::system::error_code& err);

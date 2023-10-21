@@ -122,7 +122,7 @@ void FileReader::open(const std::string &filename) {
     throw std::runtime_error(oss.str());
   }
 
-  file_.read((char *)&fileHeader_, sizeof(fileHeader_));
+  file_.read(reinterpret_cast<char *>(&fileHeader_), sizeof(fileHeader_));
   if (!file_) {
     std::ostringstream oss;
     oss << "oculus::FileReader : error reading file header.\n";
@@ -140,7 +140,7 @@ void FileReader::rewind() {
 
 void FileReader::read_next_header() const {
   itemPosition_ = file_.tellg();
-  file_.read((char *)&nextItem_, sizeof(nextItem_));
+  file_.read(reinterpret_cast<char *>(&nextItem_), sizeof(nextItem_));
   if (!file_) {
     std::memset(&nextItem_, 0, sizeof(nextItem_));
     itemPosition_ = 0;
@@ -178,7 +178,7 @@ std::size_t FileReader::read_next_item(uint8_t *dst) const {
     return 0;
   }
 
-  if (!file_.read((char *)dst, nextItem_.payloadSize)) {
+  if (!file_.read(reinterpret_cast<char *>(dst), nextItem_.payloadSize)) {
     std::memset(&nextItem_, 0, sizeof(nextItem_));
     std::ostringstream oss;
     oss << "oculus::FileReader : error reading item data. File might be "
@@ -202,8 +202,9 @@ std::size_t FileReader::read_next_item(std::vector<uint8_t> &dst) const {
 
 Message::ConstPtr FileReader::read_next_message() const {
   // Reading file until we find a rt_oculusSonar message or enf of file
-  while (nextItem_.type != blueprint::rt_oculusSonar && this->jump_item())
-    ;
+  while (nextItem_.type != blueprint::rt_oculusSonar && this->jump_item()) {
+    // Busy waiting
+  }
   if (nextItem_.type == 0) {
     return nullptr;
   }
@@ -217,7 +218,7 @@ Message::ConstPtr FileReader::read_next_message() const {
   if (nextItem_.type == blueprint::rt_oculusSonarStamp) {
     // next message is timestamp associated with the message we just read.
     TimeStamp stamp;
-    this->read_next_item((uint8_t *)&stamp);
+    this->read_next_item(reinterpret_cast<uint8_t *>(&stamp));
     message_->timestamp_ = stamp.to_sonar_stamp();
   } else {
     std::chrono::nanoseconds ns((uint64_t)(1000000000 * nextItemDate));

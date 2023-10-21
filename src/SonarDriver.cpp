@@ -92,7 +92,7 @@ SonarDriver::PingConfig SonarDriver::request_ping_config(PingConfig request) {
   // changes.
   PingConfig feedback;
   int count = 0;
-  const int maxCount = 100;  // TODO make a parameter out of this
+  const int maxCount = 100;  // TODO(jp-pino) make a parameter out of this
   do {
     if (this->send_ping_config(request)) {
       try {
@@ -172,7 +172,7 @@ void SonarDriver::handle_message(const Message::ConstPtr &message) {
       break;
     default:
       break;
-  };
+  }
 
   if (config_changed(lastConfig_, newConfig)) {
     configCallbacks_.call(lastConfig_, newConfig);

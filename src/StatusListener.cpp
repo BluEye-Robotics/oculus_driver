@@ -23,7 +23,7 @@ namespace oculus {
 using namespace std::placeholders;
 
 StatusListener::StatusListener(const IoServicePtr &service,
-                               unsigned short listeningPort)
+                               uint16_t listeningPort)
     : socket_(*service),
       remote_(boost::asio::ip::address_v4::any(), listeningPort) {
   boost::system::error_code err;

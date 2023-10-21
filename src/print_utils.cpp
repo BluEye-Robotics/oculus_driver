@@ -139,11 +139,12 @@ std::string to_string(const OculusStatusMsg &msg, const std::string &prefix) {
 std::string to_string(const OculusSimpleFireMessage &msg,
                       const std::string &prefix) {
   std::ostringstream oss;
-  oss << prefix << "masterMode      : " << (int)msg.masterMode << prefix
-      << "pingRate        : " << (int)msg.pingRate << prefix
-      << "networkSpeed    : " << (int)msg.networkSpeed << prefix
-      << "gammaCorrection : " << (int)msg.gammaCorrection << prefix
-      << "flags           : " << std::hex << (int)msg.flags << prefix
+  oss << prefix << "masterMode      : " << static_cast<int>(msg.masterMode)
+      << prefix << "pingRate        : " << static_cast<int>(msg.pingRate)
+      << prefix << "networkSpeed    : " << static_cast<int>(msg.networkSpeed)
+      << prefix << "gammaCorrection : " << static_cast<int>(msg.gammaCorrection)
+      << prefix << "flags           : " << std::hex
+      << static_cast<int>(msg.flags) << prefix
       << "range           : " << msg.range << prefix
       << "gainPercent     : " << msg.gainPercent << prefix
       << "speedOfSound    : " << msg.speedOfSound << prefix
@@ -174,11 +175,12 @@ std::string to_string(const OculusSimplePingResult &msg,
 std::string to_string(const OculusSimpleFireMessage2 &msg,
                       const std::string &prefix) {
   std::ostringstream oss;
-  oss << prefix << "masterMode      : " << (int)msg.masterMode << prefix
-      << "pingRate        : " << (int)msg.pingRate << prefix
-      << "networkSpeed    : " << (int)msg.networkSpeed << prefix
-      << "gammaCorrection : " << (int)msg.gammaCorrection << prefix
-      << "flags           : " << std::hex << (int)msg.flags << prefix
+  oss << prefix << "masterMode      : " << static_cast<int>(msg.masterMode)
+      << prefix << "pingRate        : " << static_cast<int>(msg.pingRate)
+      << prefix << "networkSpeed    : " << static_cast<int>(msg.networkSpeed)
+      << prefix << "gammaCorrection : " << static_cast<int>(msg.gammaCorrection)
+      << prefix << "flags           : " << std::hex
+      << static_cast<int>(msg.flags) << prefix
       << "rangePercent    : " << msg.rangePercent << prefix
       << "gainPercent     : " << msg.gainPercent << prefix
       << "speedOfSound    : " << msg.speedOfSound << prefix

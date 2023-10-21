@@ -15,15 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *****************************************************************************/
-
-#ifndef _DEF_OCULUS_DRIVER_OCULUS_MESSAGE_H_
-#define _DEF_OCULUS_DRIVER_OCULUS_MESSAGE_H_
+#pragma once
 
 #include <oculus_driver/Oculus.h>
 #include <oculus_driver/utils.h>
 
 #include <chrono>
 #include <cstring>
+#include <memory>
 #include <vector>
 
 namespace oculus {
@@ -114,7 +113,7 @@ class PingWrapper {
  protected:
   Message::ConstPtr msg_;
 
-  PingWrapper(const Message::ConstPtr& msg) : msg_(msg) {
+  explicit PingWrapper(const Message::ConstPtr& msg) : msg_(msg) {
     if (!msg_) {
       throw std::runtime_error(
           "Trying to make a PingMessage out of empty data.");
@@ -165,7 +164,7 @@ class PingWrapper1 : public PingWrapper {
   using ConstPtr = std::shared_ptr<const PingWrapper1>;
 
  protected:
-  PingWrapper1(const Message::ConstPtr& msg) : PingWrapper(msg) {
+  explicit PingWrapper1(const Message::ConstPtr& msg) : PingWrapper(msg) {
     if (msg->message_version() == 2) {
       throw std::runtime_error(
           "Tried to instanciate a PingWrapper1 with data from a PingWrapper2");
@@ -258,7 +257,7 @@ class PingWrapper2 : public PingWrapper {
   using ConstPtr = std::shared_ptr<const PingWrapper2>;
 
  protected:
-  PingWrapper2(const Message::ConstPtr& msg) : PingWrapper(msg) {
+  explicit PingWrapper2(const Message::ConstPtr& msg) : PingWrapper(msg) {
     if (msg->message_version() != 2) {
       throw std::runtime_error(
           "Tried to instanciate a PingWrapper2 with data from a PingWrapper1");
@@ -373,7 +372,7 @@ class PingMessage {
   PingWrapper::ConstPtr pingData_;
 
  public:  // for pybind11
-  PingMessage(const Message::ConstPtr& msg)
+  explicit PingMessage(const Message::ConstPtr& msg)
       : pingData_(make_ping_wrapper(msg)) {}
 
  public:
@@ -427,5 +426,3 @@ class PingMessage {
 };
 
 }  // namespace oculus
-
-#endif  //_DEF_OCULUS_DRIVER_OCULUS_MESSAGE_H_

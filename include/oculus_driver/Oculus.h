@@ -24,8 +24,7 @@
 // and the one from the old library are included and it (rightfully) cause
 // multiple definition errors.
 // #pragma once
-#ifndef _DEF_OCULUS_DRIVER_OCULUS_TYPES_H_
-#define _DEF_OCULUS_DRIVER_OCULUS_TYPES_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -142,11 +141,11 @@ typedef struct {
   OculusMessageHeader head;  // The standard message header
 
   uint8_t
-      masterMode;  // mode 0 is flexi mode, needs full fire message (not
-                   // available for third party developers) mode 1 - Low
-                   // Frequency Mode (wide aperture, navigation) mode 2 - High
-                   // Frequency Mode (narrow aperture, target identification)
-  uint8_t pingRate;      // Sets the maximum ping rate. was PingRateType
+      masterMode;    // mode 0 is flexi mode, needs full fire message (not
+                     // available for third party developers) mode 1 - Low
+                     // Frequency Mode (wide aperture, navigation) mode 2 - High
+                     // Frequency Mode (narrow aperture, target identification)
+  uint8_t pingRate;  // Sets the maximum ping rate. was PingRateType
   uint8_t networkSpeed;  // Used to reduce the network comms speed (useful for
                          // high latency shared links)
   uint8_t gammaCorrection;  // 0 and 0xff = gamma correction = 1.0
@@ -597,5 +596,3 @@ const OculusInfo OculusSonarInfo[] = {
      10},
     // End of the list
     {partNumberEnd}};
-
-#endif  //_DEF_OCULUS_DRIVER_OCULUS_TYPES_H_

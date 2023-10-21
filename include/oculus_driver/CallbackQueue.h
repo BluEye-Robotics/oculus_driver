@@ -15,9 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *****************************************************************************/
-
-#ifndef _DEF_OCULUS_DRIVER_CALLBACK_QUEUE_H_
-#define _DEF_OCULUS_DRIVER_CALLBACK_QUEUE_H_
+#pragma once
 
 #include <chrono>
 #include <condition_variable>
@@ -76,8 +74,9 @@ CallbackQueue<ArgTypes...>::add_callback(const CallbackT& callback) {
 
   // finding index value not already used
   CallbackId newId = callbacks_.size();
-  for (; callbacks_.find(newId) != callbacks_.end(); newId++)
-    ;
+  for (; callbacks_.find(newId) != callbacks_.end(); newId++) {
+    // Busy waiting
+  }
 
   callbacks_[newId] = callback;
   return newId;
@@ -102,8 +101,9 @@ bool CallbackQueue<ArgTypes...>::add_single_shot(const CallbackT& callback,
   sShotsCalled_ = false;
 
   CallbackId callbackId = singleShots_.size();
-  for (; singleShots_.find(callbackId) != singleShots_.end(); callbackId++)
-    ;
+  for (; singleShots_.find(callbackId) != singleShots_.end(); callbackId++) {
+    // Busy waiting
+  }
   singleShots_[callbackId] = callback;
 
   if (timeoutMillis < 0) {
@@ -150,5 +150,3 @@ void CallbackQueue<ArgTypes...>::call(ArgTypes... args) {
 }
 
 }  // namespace oculus
-
-#endif  //_DEF_OCULUS_DRIVER_CALLBACK_QUEUE_H_

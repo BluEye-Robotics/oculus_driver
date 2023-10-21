@@ -15,9 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *****************************************************************************/
-
-#ifndef _DEF_OCULUS_DRIVER_CLOCK_H_
-#define _DEF_OCULUS_DRIVER_CLOCK_H_
+#pragma once
 
 #include <chrono>
 #include <iostream>
@@ -68,5 +66,3 @@ inline std::ostream& operator<<(std::ostream& os, const oculus::Clock& clock) {
   os << clock.now() << "s";
   return os;
 }
-
-#endif  //_DEF_OCULUS_DRIVER_CLOCK_H_

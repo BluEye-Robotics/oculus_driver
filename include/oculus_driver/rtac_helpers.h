@@ -1,5 +1,4 @@
-#ifndef _DEF_OCULUS_DRIVER_RTAC_HELPERS_H_
-#define _DEF_OCULUS_DRIVER_RTAC_HELPERS_H_
+#pragma once
 
 // This header is provided for convenience if you are using the rtac framework.
 // It is not needed nor used by this driver.
@@ -14,9 +13,9 @@ namespace rtac {
 namespace types {
 
 template <typename T, template <typename> class VectorT>
-inline void oculus_to_rtac(SonarPing2D<T, VectorT>& dst,
-                           const OculusSimplePingResult& metadata,
-                           const std::vector<uint8_t>& data) {
+inline void oculus_to_rtac(
+    SonarPing2D<T, VectorT>& dst,  // NOLINT(runtime/references)
+    const OculusSimplePingResult& metadata, const std::vector<uint8_t>& data) {
   dst.resize({metadata.nBeams, metadata.nRanges});
 
   // copying bearing angles
@@ -35,7 +34,7 @@ inline void oculus_to_rtac(SonarPing2D<T, VectorT>& dst,
   if (metadata.fireMessage.flags & 0x04) {
     // gain is sent
     for (unsigned int h = 0; h < dst.range_count(); h++) {
-      float gain = 1.0f * sqrt((float)((const uint32_t*)data)[0]);
+      float gain = 1.0f * sqrt(static_cast<float>(((const uint32_t*)data)[0]));
       data += 4;
       for (int w = 0; w < dst.bearing_count; w++) {
         pingData[dst.bearing_count() * w + h] = data[w];
@@ -52,5 +51,3 @@ inline void oculus_to_rtac(SonarPing2D<T, VectorT>& dst,
 
 }  // namespace types
 }  // namespace rtac
-
-#endif  //_DEF_OCULUS_DRIVER_RTAC_HELPERS_H_

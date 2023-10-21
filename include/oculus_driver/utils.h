@@ -15,9 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *****************************************************************************/
-
-#ifndef _DEF_OCULUS_DRIVER_UTILS_H_
-#define _DEF_OCULUS_DRIVER_UTILS_H_
+#pragma once
 
 #include <oculus_driver/Oculus.h>
 #include <oculus_driver/print_utils.h>
@@ -130,5 +128,3 @@ inline bool config_changed(const OculusSimpleFireMessage& previous,
 }
 
 }  // namespace oculus
-
-#endif  //_DEF_OCULUS_DRIVER_UTILS_H_

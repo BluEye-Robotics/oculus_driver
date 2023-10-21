@@ -1,11 +1,14 @@
-#ifndef _DEF_OCULUS_DRIVER_HELPERS_H_
-#define _DEF_OCULUS_DRIVER_HELPERS_H_
+#pragma once
 
 #include <oculus_driver/Oculus.h>
 
+#include <algorithm>
 #include <cmath>
 #include <fstream>
+#include <iostream>
+#include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace oculus {
@@ -108,7 +111,8 @@ inline void ping_data_to_array(T* dst, const OculusPingResultType& metadata,
     if (has_gains(metadata)) {
       // gain is sent
       for (unsigned int h = 0; h < metadata.nRanges; h++) {
-        float gain = 1.0f / sqrt((float)((const uint32_t*)data)[0]);
+        float gain =
+            1.0f / sqrt(static_cast<float>(((const uint32_t*)data)[0]));
         data += 2;
         for (int w = 0; w < metadata.nBeams; w++) {
           dst[metadata.nBeams * w + h] = gain * data[w];
@@ -126,7 +130,8 @@ inline void ping_data_to_array(T* dst, const OculusPingResultType& metadata,
     if (has_gains(metadata)) {
       // gain is sent
       for (unsigned int h = 0; h < metadata.nRanges; h++) {
-        float gain = 1.0f / sqrt((float)((const uint32_t*)data)[0]);
+        float gain =
+            1.0f / sqrt(static_cast<float>(((const uint32_t*)data)[0]));
         data += 4;
         for (int w = 0; w < metadata.nBeams; w++) {
           dst[metadata.nBeams * w + h] = gain * data[w];
@@ -209,7 +214,8 @@ inline std::vector<float> get_ping_bearings(
 template <class OculusPingResultType>
 inline std::pair<unsigned int, unsigned int> image_from_ping_data(
     const OculusPingResultType& metadata, const std::vector<uint8_t>& msgData,
-    std::vector<float>& imageData, unsigned int imageWidth = 1024) {
+    std::vector<float>& imageData,  // NOLINT(runtime/references)
+    unsigned int imageWidth = 1024) {
   std::vector<float> bearings = get_ping_bearings(msgData);
   std::vector<float> pingData = get_ping_acoustic_data(msgData);
 
@@ -276,5 +282,3 @@ inline std::pair<unsigned int, unsigned int> image_from_ping_data(
 }
 
 }  // namespace oculus
-
-#endif  //_DEF_OCULUS_DRIVER_HELPERS_H_

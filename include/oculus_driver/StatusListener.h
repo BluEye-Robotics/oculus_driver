@@ -15,9 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *****************************************************************************/
-
-#ifndef _DEF_OCULUS_DRIVER_STATUS_LISTENER_H_
-#define _DEF_OCULUS_DRIVER_STATUS_LISTENER_H_
+#pragma once
 
 #include <oculus_driver/CallbackQueue.h>
 #include <oculus_driver/Clock.h>
@@ -25,6 +23,7 @@
 
 #include <boost/asio.hpp>
 #include <iostream>
+#include <memory>
 
 namespace oculus {
 
@@ -46,8 +45,8 @@ class StatusListener {
   Clock clock_;
 
  public:
-  StatusListener(const IoServicePtr& service,
-                 unsigned short listeningPort = 52102);
+  explicit StatusListener(const IoServicePtr& service,
+                          uint16_t listeningPort = 52102);
 
   unsigned int add_callback(
       const std::function<void(const OculusStatusMsg&)>& callback);
@@ -67,5 +66,3 @@ class StatusListener {
 };
 
 }  // namespace oculus
-
-#endif  //_DEF_OCULUS_DRIVER_STATUS_LISTENER_H_

@@ -15,15 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *****************************************************************************/
-
-#ifndef _DEF_OCULUS_DRIVER_SONAR_DRIVER_H_
-#define _DEF_OCULUS_DRIVER_SONAR_DRIVER_H_
+#pragma once
 
 #include <oculus_driver/CallbackQueue.h>
 #include <oculus_driver/Oculus.h>
 #include <oculus_driver/SonarClient.h>
 #include <oculus_driver/print_utils.h>
 #include <oculus_driver/utils.h>
+
+#include <memory>
 
 namespace oculus {
 
@@ -99,5 +99,3 @@ class SonarDriver : public SonarClient {
 };
 
 }  // namespace oculus
-
-#endif  //_DEF_OCULUS_DRIVER_SONAR_DRIVER_H_

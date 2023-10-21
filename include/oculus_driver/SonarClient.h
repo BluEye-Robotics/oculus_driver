@@ -15,9 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *****************************************************************************/
-
-#ifndef _OCULUS_DRIVER_SONAR_CLIENT_H_
-#define _OCULUS_DRIVER_SONAR_CLIENT_H_
+#pragma once
 
 #include <oculus_driver/Oculus.h>
 #include <oculus_driver/OculusMessage.h>
@@ -123,5 +121,3 @@ class SonarClient {
 };
 
 }  // namespace oculus
-
-#endif  //_OCULUS_DRIVER_SONAR_CLIENT_H_

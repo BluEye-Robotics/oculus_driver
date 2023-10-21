@@ -12,7 +12,6 @@ add_library(oculus_driver SHARED
     src/SonarClient.cpp
     src/SonarDriver.cpp
     src/AsyncService.cpp
-    src/Recorder.cpp
 )
 set_target_properties(oculus_driver PROPERTIES
     PUBLIC_HEADER "${oculus_driver_headers}"
@@ -74,5 +73,3 @@ export(EXPORT ${PROJECT_NAME}Targets
 if(BUILD_TESTS)
     add_subdirectory(tests)
 endif()
-
-

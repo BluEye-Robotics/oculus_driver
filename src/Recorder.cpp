@@ -234,8 +234,9 @@ Message::ConstPtr FileReader::read_next_message() const
         message_->timestamp_ = stamp.to_sonar_stamp();
     }
     else {
-        uint64_t nanos = 1000000000*nextItemDate;
-        message_->timestamp_ = Message::TimePoint(std::chrono::nanoseconds(nanos));
+      std::chrono::nanoseconds ns((uint64_t)(1000000000*nextItemDate));
+      Message::TimeSource::time_point tp(std::chrono::duration_cast<std::chrono::seconds>(ns));
+      message_->timestamp_ = tp;
     }
 
     return message_;
@@ -253,4 +254,3 @@ PingMessage::ConstPtr FileReader::read_next_ping() const
 }
 
 } //namespace oculus
-

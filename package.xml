@@ -4,7 +4,7 @@
   <name>oculus_driver</name>
   <version>0.0.0</version>
   <description>Driver for BluePrint Subsea Oculus sonar</description>
-  <maintainer email="">TODO</maintainer>
+  <maintainer email="luke@boxfish.nz">Luke Chang</maintainer>
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>

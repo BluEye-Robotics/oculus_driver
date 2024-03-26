@@ -175,14 +175,16 @@ std::string to_string(const OculusSimpleFireMessage2& msg, const std::string& pr
     std::ostringstream oss;
     oss << prefix << "masterMode      : " << (int)msg.masterMode << prefix << "pingRate        : " << (int)msg.pingRate << prefix
         << "networkSpeed    : " << (int)msg.networkSpeed << prefix << "gammaCorrection : " << (int)msg.gammaCorrection << prefix
-        << "flags           : " << std::hex << (int)msg.flags << prefix << "rangePercent    : " << msg.rangePercent << prefix
+        << "flags           : " << std::hex << (int)msg.flags << prefix << "rangePercent    : " << msg.range << prefix
         << "gainPercent     : " << msg.gainPercent << prefix << "speedOfSound    : " << msg.speedOfSound << prefix
-        << "salinity        : " << msg.salinity << prefix << "extFlags        : " << std::hex << msg.extFlags << prefix
-        << "reserved        :";
-    for(unsigned int i = 0; i < 8; i++)
-    {
-        oss << " " << msg.reserved[i];
-    }
+        << "salinity        : " << msg.salinity << prefix << "extFlags        : " << std::hex << msg.extFlags;
+    // Reserved values have multiple fields. Don't need to show them.
+    // << prefix
+    // << "reserved        :";
+    // for(unsigned int i = 0; i < 8; i++)
+    // {
+    //     oss << " " << msg.reserved[i];
+    // }
     return oss.str();
 }
 

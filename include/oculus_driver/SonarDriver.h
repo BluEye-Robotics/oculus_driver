@@ -36,8 +36,8 @@ class SonarDriver : public SonarClient
     using IoService    = boost::asio::io_service;
     using IoServicePtr = std::shared_ptr<IoService>;
 
-    using PingConfig    = OculusSimpleFireMessage;
-    using PingResult    = OculusSimplePingResult;
+    using PingConfig    = OculusSimpleFireMessage2;
+    using PingResult    = OculusSimplePingResult2;
 
     using MessageCallback = std::function<void(const Message::ConstPtr&)>;
     using StatusCallback  = std::function<void(const OculusStatusMsg&)>;

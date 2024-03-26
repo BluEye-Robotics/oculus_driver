@@ -25,7 +25,7 @@
 using namespace std;
 using namespace oculus;
 
-void print_ping(const OculusSimplePingResult& pingMetadata, const std::vector<uint8_t>& pingData)
+void print_ping(const OculusSimplePingResult2& pingMetadata, const std::vector<uint8_t>& pingData)
 {
     cout << "=============== Got Ping :" << endl;
     // cout << pingMetadata << endl;

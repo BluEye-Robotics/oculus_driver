@@ -220,6 +220,9 @@ class PingWrapper
     virtual double range_resolution() const = 0;
     virtual double temperature() const = 0;
     virtual double pressure() const = 0;
+    virtual double heading() const = 0;
+    virtual double pitch() const = 0;
+    virtual double roll() const = 0;
 };
 
 class PingWrapper1 : public PingWrapper
@@ -234,7 +237,7 @@ class PingWrapper1 : public PingWrapper
     {
         if(msg->message_version() == 2)
         {
-            throw std::runtime_error("Tried to instanciate a PingWrapper1 with data from a PingWrapper2");
+            throw std::runtime_error("Tried to initialize a PingWrapper1 with data from a PingWrapper2");
         }
     }
 
@@ -358,6 +361,21 @@ class PingWrapper1 : public PingWrapper
     {
         return this->metadata().pressure;
     }
+
+    virtual double heading() const
+    {
+        return 0.0;
+    }
+
+    virtual double pitch() const
+    {
+        return 0.0;
+    }
+
+    virtual double roll() const
+    {
+        return 0.0;
+    }
 };
 
 class PingWrapper2 : public PingWrapper
@@ -465,7 +483,7 @@ class PingWrapper2 : public PingWrapper
 
     virtual double range() const
     {
-        return this->metadata().fireMessage.rangePercent;
+        return this->metadata().fireMessage.range;
     }
 
     virtual double gain_percent() const
@@ -496,6 +514,21 @@ class PingWrapper2 : public PingWrapper
     virtual double pressure() const
     {
         return this->metadata().pressure;
+    }
+
+    virtual double heading() const
+    {
+        return this->metadata().heading;
+    }
+
+    virtual double pitch() const
+    {
+        return this->metadata().pitch;
+    }
+
+    virtual double roll() const
+    {
+        return this->metadata().roll;
     }
 };
 
@@ -656,6 +689,21 @@ class PingMessage
     double pressure() const
     {
         return pingData_->pressure();
+    }
+
+    double heading() const
+    {
+        return pingData_->heading();
+    }
+
+    double pitch() const
+    {
+        return pingData_->pitch();
+    }
+
+    double roll() const
+    {
+        return pingData_->roll();
     }
 };
 

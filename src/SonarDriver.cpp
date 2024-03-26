@@ -35,6 +35,7 @@ bool SonarDriver::send_ping_config(PingConfig config)
     config.head.srcDeviceId = 0;
     config.head.dstDeviceId = sonarId_;
     config.head.payloadSize = sizeof(PingConfig) - sizeof(OculusMessageHeader);
+    config.head.msgVersion = 2; // Requesting SimpleFireResponse V2
 
     // Other non runtime-configurable parameters (TODO : make then launch parameters)
     config.networkSpeed = 0xff;
@@ -161,11 +162,11 @@ void SonarDriver::handle_message(const Message::ConstPtr& message)
 {
     const auto& header = message->header();
     const auto& data = message->data();
-    OculusSimpleFireMessage newConfig = lastConfig_;
+    OculusSimpleFireMessage2 newConfig = lastConfig_;
     switch(header.msgId)
     {
     case MsgSimplePingResult:
-        newConfig = reinterpret_cast<const OculusSimplePingResult*>(data.data())->fireMessage;
+        newConfig = reinterpret_cast<const OculusSimplePingResult2*>(data.data())->fireMessage;
         newConfig.pingRate = lastConfig_.pingRate; // feedback is broken on pingRate
         // When masterMode = 2, the sonar force gainPercent between 40& and
         // 100%, BUT still needs resquested gainPercent to be between 0%

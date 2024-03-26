@@ -175,12 +175,14 @@ typedef struct
     uint8_t networkSpeed; // The max network speed in Mbs , set to 0x00 or 0xff to use link speed
     uint8_t gammaCorrection; // The gamma correction - 255 is equal to a gamma correction of 1.0
     uint8_t flags;
-    double rangePercent; // The range demand (%)
+    double range; // The range demand (%)
     double gainPercent; // The percentage gain
     double speedOfSound; // The speed of sound - set to zero to use internal calculations
     double salinity; // THe salinity to be used with internal speed of sound calculations (ppt)
     uint32_t extFlags;
-    uint32_t reserved[8];
+    uint32_t reserved0[2];
+    uint32_t beaconLocatorFrequency;
+    uint32_t reserved1[5];
 } OculusSimpleFireMessage2;
 
 // -----------------------------------------------------------------------------

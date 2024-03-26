@@ -25,7 +25,7 @@ using namespace std;
 #include <oculus_driver/Recorder.h>
 using namespace oculus;
 
-void print_ping(const OculusSimplePingResult& pingMetadata,
+void print_ping(const OculusSimplePingResult2& pingMetadata,
                 const std::vector<uint8_t>& pingData)
 {
     cout << "=============== Got Ping :" << endl;

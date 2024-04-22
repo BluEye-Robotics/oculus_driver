@@ -16,28 +16,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *****************************************************************************/
 
-#include <oculus_driver/SonarClient.h>
+#include "oculus_driver/SonarClient.h"
 
 namespace oculus {
 
 using namespace std::placeholders;
 
 SonarClient::SonarClient(const IoServicePtr &service,
+                         const std::shared_ptr<spdlog::logger> &logger,
                          const Duration &checkerPeriod)
     : ioService_(service),
+      logger(logger),
       socket_(nullptr),
       remote_(),
       sonarId_(0),
       connectionState_(Initializing),
       checkerPeriod_(checkerPeriod),
       checkerTimer_(*service, checkerPeriod_),
-      statusListener_(service),
-      // statusCallbackId_(0),
-      // data_(0)
-      statusCallbackId_(0),
-      message_(Message::Create()) {
-  // this->reset_connection();
-}
+      statusListener_(service, logger),
+      message_(Message::Create()) {}
 
 bool SonarClient::is_valid(const OculusMessageHeader &header) {
   return header.oculusId == OCULUS_CHECK_ID && header.srcDeviceId == sonarId_;
@@ -77,8 +74,7 @@ void SonarClient::checker_callback(const boost::system::error_code &err) {
     // Still doing nothing because it might be a recoverable connection
     // loss.
     connectionState_ = Lost;
-    std::cerr << std::setprecision(3) << "Connection lost for "
-              << lastStatusTime << "s\n";
+    logger->warn("Connection lost for {}s", lastStatusTime);
     return;
   }
 
@@ -86,7 +82,9 @@ void SonarClient::checker_callback(const boost::system::error_code &err) {
     // Here last status was received less than 5 seconds ago but the last
     // message is more than 10s old. The connection is probably broken and
     // needs a reset.
-    std::cerr << "Broken connection. Resetting.\n";
+    logger->warn("Broken connection. Resetting.");
+    connectionState_ = Lost;
+    errorCallbacks(err);
     // this->reset_connection();
     return;
   }
@@ -95,55 +93,59 @@ void SonarClient::checker_callback(const boost::system::error_code &err) {
 void SonarClient::check_reception(const boost::system::error_code &err) {
   // no real handling for now
   if (err) {
-    std::ostringstream oss;
-    oss << "oculus::SonarClient, reception error : " << err;
-    // throw oss.str();
-    std::cerr << oss.str() << std::endl;
+    logger->error("Reception error : {}", err.message());
   }
 }
 
 void SonarClient::reset_connection() {
   this->checkerTimer_.async_wait(
       std::bind(&SonarClient::checker_callback, this, std::placeholders::_1));
+
+  // closing previous connection
+  this->close_connection();
+
+  // reseting status listener
   connectionState_ = Attempt;
-  this->close_connection();  // closing previous connection
-  statusCallbackId_ = statusListener_.add_callback(
-      std::bind(&SonarClient::on_first_status, this, _1));
+  eventpp::counterRemover(statusListener_.callbacks())
+      .append(std::bind(&SonarClient::on_first_status, this,
+                        std::placeholders::_1));
 }
 
 void SonarClient::close_connection() {
+  this->checkerTimer_.cancel();
   if (socket_) {
     std::unique_lock<std::mutex> lock(socketMutex_);
-    std::cout << "Closing connection" << std::endl;
+    logger->info("Closing connection");
     try {
       boost::system::error_code err;
       socket_->shutdown(boost::asio::ip::tcp::socket::shutdown_both, err);
       if (err) {
-        std::cerr << "Error closing socket : '" << err << "'\n";
+        logger->error("Error closing socket : {} - {}", err.value(),
+                      err.message());
         return;
       }
-      std::cout << "Socket shutdown" << std::endl;
+      logger->info("Socket shutdown");
       socket_->close();
     } catch (const std::exception &e) {
-      std::cerr << "Error closing connection : " << e.what() << std::endl;
+      logger->error("Error closing connection : {}", e.what());
     }
     socket_ = nullptr;
-    std::cout << "Connection closed" << std::endl;
+    logger->info("Connection closed");
   }
   connectionState_ = Initializing;
+  status_callbacks()(statusListener_.get_latest());
 }
 
 void SonarClient::on_first_status(const OculusStatusMsg &msg) {
-  // got a status message. No need to keep listening.
-  statusListener_.remove_callback(statusCallbackId_);
-
   // device id and ip fetched from status message
   sonarId_ = msg.hdr.srcDeviceId;
   remote_ = remote_from_status<EndPoint>(msg);
 
-  std::cout << "Got Oculus status"
-            << "\n- netip   : " << ip_to_string(msg.ipAddr)
-            << "\n- netmask : " << ip_to_string(msg.ipMask) << std::endl;
+  logger->info(
+      "Got Oculus status:\n"
+      "- netip   : {}\n"
+      "- netmask : {}",
+      ip_to_string(msg.ipAddr), ip_to_string(msg.ipMask));
 
   // attempting connection
   socket_ = std::make_unique<Socket>(*ioService_);
@@ -153,19 +155,20 @@ void SonarClient::on_first_status(const OculusStatusMsg &msg) {
 
 void SonarClient::connect_callback(const boost::system::error_code &err) {
   if (err) {
-    std::ostringstream oss;
-    oss << "oculus::SonarClient : connection failure. ( " << remote_ << ")";
+    logger->error("Connection failure : {}. Remote: {}", err.message(),
+                  remote_.address().to_string());
+    errorCallbacks(err);
     return;
   }
-  std::cout << "Connection successful (" << remote_ << ")" << std::endl
-            << std::flush;
+
+  logger->info("Connection successful ({})", remote_.address().to_string());
 
   clock_.reset();
 
   connectionState_ = Connected;
+
   // this enters the ping data reception loop
   this->initiate_receive();
-
   this->on_connect();
 }
 
@@ -182,7 +185,7 @@ void SonarClient::initiate_receive() {
   // the header, a short read will happen, so that the next read will be
   // exactly aligned on the next header.
   static unsigned int count = 0;
-  // std::cout << "Initiate receive : " << count << std::endl << std::flush;
+  logger->trace("Initiate receive");
   count++;
   boost::asio::async_read(
       *socket_,
@@ -193,17 +196,8 @@ void SonarClient::initiate_receive() {
 
 void SonarClient::header_received_callback(const boost::system::error_code err,
                                            std::size_t receivedByteCount) {
-  // auto now = std::chrono::system_clock::now();
-  // auto time = std::chrono::system_clock::to_time_t(now);
-  // auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-  //                         now.time_since_epoch()) %
-  //                     1000;
-  // std::tm *tm = std::localtime(&time);
-  // std::cout << std::put_time(tm, "%T") << "." << std::setfill('0')
-  //           << std::setw(3) << milliseconds.count()
-  //           << " header_received_callback" << std::endl;
+  logger->trace("Header received callback");
   static unsigned int count = 0;
-  // std::cout << "Receive callback : " << count << std::endl << std::flush;
   count++;
   // This function received only enough bytes for an OculusMessageHeader.  If
   // the header is valid, the control is dispatched to the next state
@@ -216,7 +210,7 @@ void SonarClient::header_received_callback(const boost::system::error_code err,
       !this->is_valid(message_->header_)) {
     // Either we got data in the middle of a ping or did not get enougth
     // bytes (end of message). Continue listening to get a valid header.
-    std::cout << "Header reception error" << std::endl << std::flush;
+    logger->error("Header reception error");
     this->initiate_receive();
     return;
   }
@@ -233,19 +227,10 @@ void SonarClient::header_received_callback(const boost::system::error_code err,
 
 void SonarClient::data_received_callback(const boost::system::error_code err,
                                          std::size_t receivedByteCount) {
-  // auto now = std::chrono::system_clock::now();
-  // auto time = std::chrono::system_clock::to_time_t(now);
-  // auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-  //                         now.time_since_epoch()) %
-  //                     1000;
-  // std::tm *tm = std::localtime(&time);
-  // std::cout << std::put_time(tm, "%T") << "." << std::setfill('0')
-  //           << std::setw(3) << milliseconds.count() << "
-  //           data_received_callback"
-  //           << std::endl;
+  logger->trace("Data received callback");
   if (receivedByteCount != message_->header_.payloadSize) {
     // We did not get enough bytes. Reinitiating reception.
-    std::cout << "Data reception error" << std::endl << std::flush;
+    logger->error("Data reception error");
     this->initiate_receive();
     return;
   }

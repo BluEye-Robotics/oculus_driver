@@ -17,11 +17,8 @@
  *****************************************************************************/
 #pragma once
 
-#include <oculus_driver/Oculus.h>
-#include <oculus_driver/OculusMessage.h>
-#include <oculus_driver/StatusListener.h>
-#include <oculus_driver/print_utils.h>
-#include <oculus_driver/utils.h>
+#include <fmt/format.h>
+#include <spdlog/spdlog.h>
 
 #include <boost/asio.hpp>
 #include <chrono>
@@ -33,6 +30,12 @@
 #include <mutex>
 #include <thread>
 #include <type_traits>
+
+#include "StatusListener.h"
+#include "oculus_driver/Oculus.h"
+#include "oculus_driver/OculusMessage.h"
+#include "print_utils.h"
+#include "utils.h"
 
 namespace oculus {
 
@@ -66,6 +69,7 @@ class SonarClient {
 
  protected:
   IoServicePtr ioService_;
+  const std::shared_ptr<spdlog::logger> logger;
   SocketPtr socket_;
   EndPoint remote_;
   uint16_t sonarId_;
@@ -77,9 +81,10 @@ class SonarClient {
   Clock clock_;
 
   StatusListener statusListener_;
-  unsigned int statusCallbackId_;
 
   Message::Ptr message_;
+
+  eventpp::CallbackList<void(const boost::system::error_code&)> errorCallbacks;
 
   // helper stubs
   void checker_callback(const boost::system::error_code& err);
@@ -87,6 +92,7 @@ class SonarClient {
 
  public:
   SonarClient(const IoServicePtr& ioService,
+              const std::shared_ptr<spdlog::logger>& logger,
               const Duration& checkerPeriod = boost::posix_time::seconds(1));
 
   bool is_valid(const OculusMessageHeader& header);
@@ -118,6 +124,9 @@ class SonarClient {
   }
 
   TimePoint last_header_stamp() const { return message_->timestamp(); }
+
+  auto& status_callbacks() { return statusListener_.callbacks(); }
+  auto& error_callbacks() { return errorCallbacks; }
 };
 
 }  // namespace oculus

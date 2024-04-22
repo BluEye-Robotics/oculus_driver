@@ -1,17 +1,26 @@
 cmake_minimum_required(VERSION 3.16)
-project(oculus_driver VERSION 1.2.1)
+project(oculus_driver VERSION 2.0.0)
 
 option(BUILD_TESTS "Build unit tests" OFF)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/DefaultBuildType.cmake)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(PkgConfig REQUIRED)
 find_package(Boost COMPONENTS system thread REQUIRED)
+pkg_check_modules(FMT fmt)
+find_package(spdlog REQUIRED)
+find_package(eventpp CONFIG REQUIRED)
+
+add_definitions(-DSPDLOG_COMPILED_LIB)
+add_definitions(-DSPDLOG_FMT_EXTERNAL=on)
 
 add_library(oculus_driver SHARED
     src/print_utils.cpp
     src/StatusListener.cpp
     src/SonarClient.cpp
     src/SonarDriver.cpp
-    src/AsyncService.cpp
 )
 set_target_properties(oculus_driver PROPERTIES
     PUBLIC_HEADER "${oculus_driver_headers}"
@@ -20,10 +29,13 @@ set_target_properties(oculus_driver PROPERTIES
 target_include_directories(oculus_driver PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
+    ${EVENTPP_INCLUDE_DIR}
 )
 target_link_libraries(oculus_driver PUBLIC
     Boost::system
     Boost::thread
+    ${SPDLOG_LIBRARIES}
+    ${FMT_LIBRARIES}
 )
 target_compile_features(oculus_driver PUBLIC cxx_std_17)
 

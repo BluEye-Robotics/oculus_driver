@@ -23,23 +23,19 @@ namespace oculus
 
 using namespace std::placeholders;
 
-SonarClient::SonarClient(const IoServicePtr& service, const Duration& checkerPeriod)
+SonarClient::SonarClient(const IoServicePtr &service,
+                         const std::shared_ptr<spdlog::logger> &logger,
+                         const Duration &checkerPeriod)
     : ioService_(service),
+      logger(logger),
       socket_(nullptr),
       remote_(),
       sonarId_(0),
       connectionState_(Initializing),
       checkerPeriod_(checkerPeriod),
       checkerTimer_(*service, checkerPeriod_),
-      statusListener_(service),
-      // statusCallbackId_(0),
-      // data_(0)
-      statusCallbackId_(0),
-      message_(Message::Create())
-{
-    this->checkerTimer_.async_wait(std::bind(&SonarClient::checker_callback, this, std::placeholders::_1));
-    this->reset_connection();
-}
+      statusListener_(service, logger),
+      message_(Message::Create()) {}
 
 bool SonarClient::is_valid(const OculusMessageHeader& header)
 {
@@ -68,6 +64,18 @@ size_t SonarClient::send(const boost::asio::streambuf& buffer) const
  */
 void SonarClient::checker_callback(const boost::system::error_code& err)
 {
+    if(err) 
+    {
+        logger->error("Checker error: {}", err.message());
+        return;
+    }
+
+    if(checkerTimer_.expires_at() == boost::posix_time::neg_infin) 
+    {
+        logger->error("Checker timer cancelled");
+        return;
+    }
+
     // Programming now the next check
     this->checkerTimer_.expires_from_now(checkerPeriod_);
     this->checkerTimer_.async_wait(std::bind(&SonarClient::checker_callback, this, std::placeholders::_1));
@@ -86,7 +94,7 @@ void SonarClient::checker_callback(const boost::system::error_code& err)
         // Still doing nothing because it might be a recoverable connection
         // loss.
         connectionState_ = Lost;
-        std::cerr << std::setprecision(3) << "Connection lost for " << lastStatusTime << "s\n";
+        logger->warn("Connection lost for {}s", lastStatusTime);
         return;
     }
 
@@ -95,8 +103,9 @@ void SonarClient::checker_callback(const boost::system::error_code& err)
         // Here last status was received less than 5 seconds ago but the last
         // message is more than 10s old. The connection is probably broken and
         // needs a reset.
-        std::cerr << "Broken connection. Resetting.\n";
-        this->reset_connection();
+        logger->warn("Broken connection. Informing user.");
+        connectionState_ = Lost;
+        errorCallbacks(err);
         return;
     }
 }
@@ -106,57 +115,68 @@ void SonarClient::check_reception(const boost::system::error_code& err)
     // no real handling for now
     if(err)
     {
-        std::ostringstream oss;
-        oss << "oculus::SonarClient, reception error : " << err;
-        // throw oss.str();
-        std::cerr << oss.str() << std::endl;
+        logger->error("Reception error : {}", err.message());
     }
 }
 
 void SonarClient::reset_connection()
 {
-    connectionState_ = Attempt;
+    logger->info("Resetting connection");
+    
     this->close_connection(); // closing previous connection
-    statusCallbackId_ = statusListener_.add_callback(std::bind(&SonarClient::on_first_status, this, _1));
+    
+    connectionState_ = Attempt;
+    
+    eventpp::counterRemover(statusListener_.callbacks())
+        .append(std::bind(&SonarClient::on_first_status, this,
+                            std::placeholders::_1));
 }
 
 void SonarClient::close_connection()
 {
+    logger->info("Closing connection");
+    std::unique_lock<std::mutex> lock(socketMutex_);
+    this->checkerTimer_.cancel();
+    checkerTimer_.expires_at(boost::posix_time::neg_infin);
     if(socket_)
     {
-        std::unique_lock<std::mutex> lock(socketMutex_);
-        std::cout << "Closing connection" << std::endl;
+        logger->info("Socket open. Closing now");
         try
         {
             boost::system::error_code err;
             socket_->shutdown(boost::asio::ip::tcp::socket::shutdown_both, err);
             if(err)
             {
-                std::cerr << "Error closing socket : '" << err << "'\n";
+                logger->error("Error closing socket : {} - {}", err.value(), err.message());
                 return;
             }
+            logger->info("Socket shutdown");
             socket_->close();
         }
         catch(const std::exception& e)
         {
-            std::cerr << "Error closing connection : " << e.what() << std::endl;
+            logger->error("Error closing connection : {}", e.what());
         }
-        socket_ = nullptr;
+        socket_.reset();
+        logger->info("Connection closed");
     }
+    connectionState_ = Initializing;
+    status_callbacks()(statusListener_.get_latest());
 }
 
 void SonarClient::on_first_status(const OculusStatusMsg& msg)
 {
-    // got a status message. No need to keep listening.
-    statusListener_.remove_callback(statusCallbackId_);
+    std::unique_lock<std::mutex> lock(socketMutex_);
 
     // device id and ip fetched from status message
     sonarId_ = msg.head.srcDeviceId;
     remote_ = remote_from_status<EndPoint>(msg);
 
-    std::cout << "Got Oculus status"
-              << "\n- netip  : " << ip_to_string(msg.ipAddr) << "\n- netmask: " << ip_to_string(msg.ipMask)
-              << "\n- temp   : " << ((msg.status & 0x0000c000) >> 14) << std::endl;
+    logger->info(
+        "Got Oculus status:\n"
+        "- netip   : {}\n"
+        "- netmask : {}",
+        ip_to_string(msg.ipAddr), ip_to_string(msg.ipMask));
 
     // attempting connection
     socket_ = std::make_unique<Socket>(*ioService_);
@@ -165,30 +185,32 @@ void SonarClient::on_first_status(const OculusStatusMsg& msg)
 
 void SonarClient::connect_callback(const boost::system::error_code& err)
 {
-    if(err)
+    if(err) 
     {
-        std::ostringstream oss;
-        oss << "oculus::SonarClient : connection failure. ( " << remote_ << ")";
-        throw std::runtime_error(oss.str());
+        logger->error("Connection failure : {}. Remote: {}", err.message(),
+                    remote_.address().to_string());
+        errorCallbacks(err);
+        return;
     }
-    std::cout << "Connection successful (" << remote_ << ")" << std::endl << std::flush;
+
+    logger->info("Connection successful ({})", remote_.address().to_string());
+
+    this->checkerTimer_.expires_from_now(checkerPeriod_);
+    this->checkerTimer_.async_wait(
+        std::bind(&SonarClient::checker_callback, this, std::placeholders::_1));
 
     clock_.reset();
 
     connectionState_ = Connected;
+
     // this enters the ping data reception loop
     this->initiate_receive();
-
     this->on_connect();
-}
-
-void SonarClient::on_connect()
-{
-    // To be reimplemented in a subclass
 }
 
 void SonarClient::initiate_receive()
 {
+    std::unique_lock<std::mutex> lock(socketMutex_);
     if(!socket_) return;
     // asynchronously scan input until finding a valid header.
     // /!\ To be checked : This function and its callback handle the data
@@ -197,8 +219,7 @@ void SonarClient::initiate_receive()
     // the header, a short read will happen, so that the next read will be
     // exactly aligned on the next header.
     static unsigned int count = 0;
-    // std::cout << "Initiate receive : " << count << std::endl << std::flush;
-    count++;
+    logger->trace("Initiate receive: {}", count++);
     boost::asio::async_read(*socket_,
                             boost::asio::buffer(reinterpret_cast<uint8_t*>(&message_->header_), sizeof(message_->header_)),
                             std::bind(&SonarClient::header_received_callback, this, _1, _2));
@@ -207,8 +228,7 @@ void SonarClient::initiate_receive()
 void SonarClient::header_received_callback(const boost::system::error_code err, std::size_t receivedByteCount)
 {
     static unsigned int count = 0;
-    // std::cout << "Receive callback : " << count << std::endl << std::flush;
-    count++;
+    logger->trace("Header received callback: {}", count);
     // This function received only enough bytes for an OculusMessageHeader.  If
     // the header is valid, the control is dispatched to the next state
     // depending on the header content (message type). For now only simple ping
@@ -220,7 +240,7 @@ void SonarClient::header_received_callback(const boost::system::error_code err, 
     {
         // Either we got data in the middle of a ping or did not get enougth
         // bytes (end of message). Continue listening to get a valid header.
-        std::cout << "Header reception error" << std::endl << std::flush;
+        logger->error("Header reception error");
         this->initiate_receive();
         return;
     }
@@ -229,16 +249,24 @@ void SonarClient::header_received_callback(const boost::system::error_code err, 
     // (The header contains the payload size, we can receive everything and
     // parse afterwards).
     message_->update_from_header();
-    boost::asio::async_read(*socket_, boost::asio::buffer(message_->payload_handle(), message_->payload_size()),
-                            std::bind(&SonarClient::data_received_callback, this, _1, _2));
+    {
+        std::unique_lock<std::mutex> lock(socketMutex_);
+        if(!socket_) return;
+        boost::asio::async_read(
+            *socket_,
+            boost::asio::buffer(message_->payload_handle(),
+                                message_->payload_size()),
+            std::bind(&SonarClient::data_received_callback, this, _1, _2));
+    }
 }
 
 void SonarClient::data_received_callback(const boost::system::error_code err, std::size_t receivedByteCount)
 {
+    logger->trace("Data received callback");
     if(receivedByteCount != message_->header_.payloadSize)
     {
         // We did not get enough bytes. Reinitiating reception.
-        std::cout << "Data reception error" << std::endl << std::flush;
+        logger->error("Data reception error");
         this->initiate_receive();
         return;
     }
@@ -249,11 +277,6 @@ void SonarClient::data_received_callback(const boost::system::error_code err, st
 
     // Continuing the reception loop.
     this->initiate_receive();
-}
-
-void SonarClient::handle_message(const Message::ConstPtr& msg)
-{
-    // To be reimplemented in a subclass
 }
 
 } // namespace oculus

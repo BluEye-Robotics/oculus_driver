@@ -42,12 +42,10 @@ int main()
     auto ioService = std::make_shared<SonarDriver::IoService>();
     SonarDriver driver(ioService);
     
-    driver.add_ping_callback(&print_ping);
-    driver.add_dummy_callback(&print_dummy);
+    driver.ping_callbacks().append(&print_ping);
+    driver.dummy_callbacks().append(&print_dummy);
 
     ioService->run(); // is blocking
 
     return 0;
 }
-
-

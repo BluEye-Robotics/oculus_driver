@@ -16,27 +16,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *****************************************************************************/
 
-#ifndef _OCULUS_DRIVER_SONAR_CLIENT_H_
-#define _OCULUS_DRIVER_SONAR_CLIENT_H_
+#pragma once
 
-#include <iostream>
-#include <iomanip>
-#include <cstring>
+#include <eventpp/callbacklist.h>
+#include <fmt/format.h>
+#include <spdlog/spdlog.h>
+
+#include <boost/asio.hpp>
+#include <chrono>
 #include <cmath>
+#include <cstring>
+#include <iomanip>
+#include <iostream>
 #include <memory>
 #include <mutex>
 #include <thread>
-#include <chrono>
 #include <type_traits>
 
-#include <boost/asio.hpp>
-
-#include <oculus_driver/Oculus.h>
-#include <oculus_driver/utils.h>
-#include <oculus_driver/print_utils.h>
-#include <oculus_driver/StatusListener.h>
-
-#include <oculus_driver/OculusMessage.h>
+#include "StatusListener.h"
+#include "oculus_driver/Oculus.h"
+#include "oculus_driver/OculusMessage.h"
+#include "print_utils.h"
+#include "utils.h"
 
 namespace oculus {
 
@@ -73,6 +74,9 @@ class SonarClient
     protected:
     
     IoServicePtr       ioService_;
+
+    const std::shared_ptr<spdlog::logger>   logger;
+
     SocketPtr          socket_;
     EndPoint           remote_;
     uint16_t           sonarId_;
@@ -84,7 +88,9 @@ class SonarClient
     Clock                        clock_;
     
     StatusListener statusListener_;
-    unsigned int   statusCallbackId_;
+    eventpp::CallbackList<void(const boost::system::error_code&)> errorCallbacks;
+    eventpp::CallbackList<void(bool)> connectCallbacks;
+    
 
     Message::Ptr message_;
 
@@ -95,6 +101,7 @@ class SonarClient
     public:
 
     SonarClient(const IoServicePtr& ioService,
+                const std::shared_ptr<spdlog::logger>& logger,
                 const Duration& checkerPeriod = boost::posix_time::seconds(1));
 
     bool is_valid(const OculusMessageHeader& header);
@@ -107,7 +114,7 @@ class SonarClient
     void close_connection();
     void on_first_status(const OculusStatusMsg& msg);
     void connect_callback(const boost::system::error_code& err);
-    virtual void on_connect();
+    virtual void on_connect() = 0;
 
     // main loop begin
     void initiate_receive();
@@ -118,14 +125,16 @@ class SonarClient
     
     // This is called regardless of the content of the message.
     // To be reimplemented in a subclass (does nothing by default).
-    virtual void handle_message(const Message::ConstPtr& msg);
+    virtual void handle_message(const Message::ConstPtr& msg) = 0;
 
     template <typename TimeT = float>
     TimeT time_since_last_message() const { return clock_.now<TimeT>(); }
 
     TimePoint last_header_stamp() const { return message_->timestamp(); }
+
+    inline auto& connect_callbacks() {return connectCallbacks; }
+    inline auto& status_callbacks() { return statusListener_.callbacks(); }
+    inline auto& error_callbacks() { return errorCallbacks; }
 };
 
 } //namespace oculus
-
-#endif //_OCULUS_DRIVER_SONAR_CLIENT_H_

@@ -18,6 +18,8 @@
 
 #include "oculus_driver/print_utils.h"
 
+#include <magic_enum_all.hpp>
+
 namespace oculus
 {
 
@@ -39,19 +41,7 @@ std::string mac_to_string(const uint8_t* mac)
 
 std::string to_string(DataSizeType dataType)
 {
-    switch(dataType)
-    {
-    case ImageData8Bit:
-        return "8bit";
-    case ImageData16Bit:
-        return "16bit";
-    case ImageData24Bit:
-        return "24bit";
-    case ImageData32Bit:
-        return "32bit";
-    default:
-        return "invalid";
-    }
+    return std::string{magic_enum::enum_name(dataType)};
 }
 
 std::string to_string(PingRateType pingRate)
@@ -77,49 +67,7 @@ std::string to_string(PingRateType pingRate)
 
 std::string to_string(OculusPartNumberType partNumber)
 {
-    switch(partNumber)
-    {
-    case M370s:
-        return "M370s";
-    case MT370s:
-        return "MT370s";
-    case MD370s:
-        return "MD370s";
-    case MF370s:
-        return "MF370s";
-    case MA370s:
-        return "MA370s";
-    case M750d:
-        return "M750d";
-    case MT750d:
-        return "MT750d";
-    case MD750d:
-        return "MD750d";
-    case MF750d:
-        return "MF750d";
-    case MA750d:
-        return "MA750d";
-    case M1200d:
-        return "M1200d";
-    case MT1200d:
-        return "MT1200d";
-    case MD1200d:
-        return "MD1200d";
-    case MF1200d:
-        return "MF1200d";
-    case MA1200d:
-        return "MA1200d";
-    case M3000d:
-        return "M3000d";
-    case MT3000d:
-        return "MT3000d";
-    case MF3000d:
-        return "MF3000d";
-    case MA3000d:
-        return "MA3000d";
-    default:
-        return "unknown";
-    }
+    return std::string{magic_enum::enum_name(partNumber)};
 }
 
 std::string to_string(const OculusMessageHeader& msg, const std::string& prefix)

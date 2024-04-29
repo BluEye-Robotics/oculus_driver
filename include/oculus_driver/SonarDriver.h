@@ -15,15 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *****************************************************************************/
+#pragma once
 
-#ifndef _DEF_OCULUS_DRIVER_SONAR_DRIVER_H_
-#define _DEF_OCULUS_DRIVER_SONAR_DRIVER_H_
+#include <eventpp/callbacklist.h>
+#include <eventpp/utilities/counterremover.h>
 
-#include <oculus_driver/Oculus.h>
-#include <oculus_driver/utils.h>
-#include <oculus_driver/print_utils.h>
-#include <oculus_driver/CallbackQueue.h>
-#include <oculus_driver/SonarClient.h>
+#include <memory>
+
+#include "oculus_driver/Oculus.h"
+#include "oculus_driver/SonarClient.h"
+#include "oculus_driver/print_utils.h"
+#include "oculus_driver/utils.h"
 
 namespace oculus {
 
@@ -39,30 +41,25 @@ class SonarDriver : public SonarClient
     using PingConfig    = OculusSimpleFireMessage2;
     using PingResult    = OculusSimplePingResult2;
 
-    using MessageCallback = std::function<void(const Message::ConstPtr&)>;
-    using StatusCallback  = std::function<void(const OculusStatusMsg&)>;
-    using PingCallback    = std::function<void(const PingMessage::ConstPtr)>;
-    using DummyCallback   = std::function<void(const OculusMessageHeader&)>;
-    using ConfigCallback  = std::function<void(const PingConfig&, const PingConfig&)>;
-
     using TimeSource = SonarClient::TimeSource;
     using TimePoint  = typename std::invoke_result<decltype(&TimeSource::now)>::type;
 
     protected:
-
     PingConfig lastConfig_;
     uint8_t    lastPingRate_;
 
     // message callbacks will be called on every received message.
     // config callbacks will be called on (detectable) configuration changes.
-    CallbackQueue<const Message::ConstPtr&>             messageCallbacks_;
-    CallbackQueue<const PingMessage::ConstPtr>          pingCallbacks_;
-    CallbackQueue<const OculusMessageHeader&>           dummyCallbacks_;
-    CallbackQueue<const PingConfig&, const PingConfig&> configCallbacks_;
+    eventpp::CallbackList<void(const Message::ConstPtr&)> messageCallbacks_;
+    eventpp::CallbackList<void(const PingMessage::ConstPtr)> pingCallbacks_;
+    eventpp::CallbackList<void(const OculusMessageHeader&)> dummyCallbacks_;
+    eventpp::CallbackList<void(const PingConfig&, const PingConfig&)>
+        configCallbacks_;
 
     public:
 
     SonarDriver(const IoServicePtr& service,
+                const std::shared_ptr<spdlog::logger>& logger,
                 const Duration& checkerPeriod = boost::posix_time::seconds(1));
 
     bool send_ping_config(PingConfig config);
@@ -80,28 +77,10 @@ class SonarDriver : public SonarClient
     /////////////////////////////////////////////
     // All remaining member function are related to callbacks and are merely
     // helpers to add callbacks.
-
-    unsigned int add_message_callback(const MessageCallback& callback);
-    unsigned int add_status_callback (const StatusCallback&  callback);
-    unsigned int add_ping_callback   (const PingCallback&    callback);
-    unsigned int add_dummy_callback  (const DummyCallback&   callback);
-    unsigned int add_config_callback (const ConfigCallback&  callback);
-
-    bool remove_message_callback(unsigned int callbackId);
-    bool remove_status_callback (unsigned int callbackId);
-    bool remove_ping_callback   (unsigned int callbackId);
-    bool remove_dummy_callback  (unsigned int callbackId);
-
-    // these are synchronous function which will wait for the next message
-    bool wait_next_message();
-    bool on_next_message(const MessageCallback& callback);
-    bool on_next_status (const StatusCallback&  callback);
-    bool on_next_ping   (const PingCallback&    callback);
-    bool on_next_dummy  (const DummyCallback&   callback);
+    auto& message_callbacks() { return messageCallbacks_; }
+    auto& ping_callbacks() { return pingCallbacks_; }
+    auto& dummy_callbacks() { return dummyCallbacks_; }
+    auto& config_callbacks() { return configCallbacks_; }
 };
 
 } //namespace oculus
-
-#endif //_DEF_OCULUS_DRIVER_SONAR_DRIVER_H_
-
-

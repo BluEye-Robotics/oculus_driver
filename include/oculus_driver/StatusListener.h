@@ -16,16 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *****************************************************************************/
 
-#ifndef _DEF_OCULUS_DRIVER_STATUS_LISTENER_H_
-#define _DEF_OCULUS_DRIVER_STATUS_LISTENER_H_
+#pragma once
 
-#include <iostream>
+#include <eventpp/callbacklist.h>
+#include <eventpp/utilities/counterremover.h>
+#include <fmt/format.h>
+#include <spdlog/spdlog.h>
 
 #include <boost/asio.hpp>
+#include <iostream>
+#include <memory>
 
-#include <oculus_driver/Oculus.h>
-#include <oculus_driver/CallbackQueue.h>
-#include <oculus_driver/Clock.h>
+#include "oculus_driver/Clock.h"
+#include "oculus_driver/Oculus.h"
 
 namespace oculus {
 
@@ -37,28 +40,32 @@ class StatusListener
     using IoServicePtr = std::shared_ptr<IoService>;
     using Socket       = boost::asio::ip::udp::socket;
     using EndPoint     = boost::asio::ip::udp::endpoint;
-    using Callbacks    = CallbackQueue<const OculusStatusMsg&>;
-    using CallbackT    = Callbacks::CallbackT;
-    using CallbackId   = Callbacks::CallbackId;
+
+    private:
+    OculusStatusMsg prev_;
 
     protected:
+    const std::shared_ptr<spdlog::logger> logger;
 
     Socket          socket_;
     EndPoint        remote_;
     OculusStatusMsg msg_;
-    Callbacks       callbacks_;
     Clock           clock_;
+
+    eventpp::CallbackList<void(const OculusStatusMsg&)> callbacks_;
 
     public:
 
-    StatusListener(const IoServicePtr& service, unsigned short listeningPort = 52102);
+    StatusListener(const IoServicePtr& service,
+                   const std::shared_ptr<spdlog::logger>& logger,
+                   uint16_t listeningPort = 52102);
     
-    unsigned int add_callback(const std::function<void(const OculusStatusMsg&)>& callback);
-    bool remove_callback(unsigned int index);
-    bool on_next_status(const std::function<void(const OculusStatusMsg&)>& callback);
+    inline auto& callbacks() { return callbacks_; }
 
     template <typename T = float>
     T time_since_last_status() const { return clock_.now<T>(); }
+
+    inline OculusStatusMsg get_latest() { return prev_; }
     
     private:
     
@@ -67,5 +74,3 @@ class StatusListener
 };
 
 } //namespace oculus
-
-#endif //_DEF_OCULUS_DRIVER_STATUS_LISTENER_H_

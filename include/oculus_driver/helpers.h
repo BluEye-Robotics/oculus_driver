@@ -1,12 +1,11 @@
-#ifndef _DEF_OCULUS_DRIVER_HELPERS_H_
-#define _DEF_OCULUS_DRIVER_HELPERS_H_
+#pragma once
 
 #include <vector>
 #include <cmath>
 #include <fstream>
 #include <string>
 
-#include <oculus_driver/Oculus.h>
+#include "oculus_driver/Oculus.h"
 
 namespace oculus {
 
@@ -296,5 +295,3 @@ inline std::pair<unsigned int, unsigned int> image_from_ping_data(
 }
 
 } //namespace oculus
-
-#endif //_DEF_OCULUS_DRIVER_HELPERS_H_

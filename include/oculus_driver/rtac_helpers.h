@@ -1,17 +1,17 @@
-#ifndef _DEF_OCULUS_DRIVER_RTAC_HELPERS_H_
-#define _DEF_OCULUS_DRIVER_RTAC_HELPERS_H_
+#pragma once
 
 // This header is provided for convenience if you are using the rtac framework.
 // It is not needed nor used by this driver.
 
-#include <vector>
-
-#include <oculus_driver/Oculus.h>
-
 #include <rtac_base/types/Image.h>
 #include <rtac_base/types/SonarPing2D.h>
 
-namespace rtac { namespace types {
+#include <vector>
+
+#include "oculus_driver/Oculus.h"
+
+namespace rtac { 
+namespace types {
 
 template <typename T, template<typename> class VectorT>
 inline void oculus_to_rtac(SonarPing2D<T,VectorT>& dst, 
@@ -54,5 +54,3 @@ inline void oculus_to_rtac(SonarPing2D<T,VectorT>& dst,
 
 } //namespace types
 } //namespace rtac
-
-#endif //_DEF_OCULUS_DRIVER_RTAC_HELPERS_H_

@@ -16,16 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *****************************************************************************/
 
-#include <oculus_driver/StatusListener.h>
+#include "oculus_driver/StatusListener.h"
 
 namespace oculus {
 
 using namespace std::placeholders;
 
-StatusListener::StatusListener(const IoServicePtr& service,
-                               unsigned short listeningPort) :
-    socket_(*service),
-    remote_(boost::asio::ip::address_v4::any(), listeningPort)
+StatusListener::StatusListener(const IoServicePtr &service,
+                               const std::shared_ptr<spdlog::logger> &logger,
+                               uint16_t listeningPort)
+    : logger(logger),
+      socket_(*service),
+      remote_(boost::asio::ip::address_v4::any(), listeningPort) 
 {
     boost::system::error_code err;
     socket_.open(boost::asio::ip::udp::v4(), err);
@@ -38,7 +40,7 @@ StatusListener::StatusListener(const IoServicePtr& service,
     if(err)
         throw std::runtime_error("oculus::StatusListener : Socket remote error");
 
-    std::cout << "oculus::StatusListener : listening to remote : " << remote_ << std::endl;
+    logger->info("oculus::StatusListener : listening to remote : {}", remote_.address().to_string());
     this->get_one_message();
 }
 
@@ -48,43 +50,25 @@ void StatusListener::get_one_message()
                           std::bind(&StatusListener::message_callback, this, _1, _2));
 }
 
-unsigned int StatusListener::add_callback(
-    const std::function<void(const OculusStatusMsg&)>& callback)
-{
-    return callbacks_.add_callback(callback);
-}
-
-bool StatusListener::remove_callback(unsigned int index)
-{
-    return callbacks_.remove_callback(index);
-}
-
-bool StatusListener::on_next_status(
-    const std::function<void(const OculusStatusMsg&)>& callback)
-{
-    return callbacks_.add_single_shot(callback);
-}
-
-
 void StatusListener::message_callback(const boost::system::error_code& err,
                                       std::size_t bytesReceived)
 {
     if(err) {
-        std::cerr << "oculus::StatusListener::read_callback : Status reception error.\n";
+        logger->error("oculus::StatusListener::message_callback: Status reception error.");
         this->get_one_message();
         return;
     }
 
     if(bytesReceived != sizeof(OculusStatusMsg)) {
-        std::cerr << "oculus::StatusListener::read_callback : not enough bytes.\n";
+        logger->error("oculus::StatusListener::message_callback: not enough bytes.");
         this->get_one_message();
         return;
     }
     
     // we are clean here
     clock_.reset();
-    //std::cout << msg_ << std::endl;
-    callbacks_.call(msg_);
+    prev_ = msg_;
+    callbacks_(msg_);
     this->get_one_message();
 }
 

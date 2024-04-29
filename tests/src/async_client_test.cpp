@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <spdlog/spdlog.h>
 
 using namespace std;
 using namespace oculus;
@@ -65,11 +66,11 @@ int main()
 {
     // Sonar sonar;
     AsyncService ioService;
-    SonarDriver sonar(ioService.io_service());
+    SonarDriver sonar(ioService.io_service(), spdlog::get("console"));
 
     // sonar.add_ping_callback(&print_ping);
-    // sonar.add_dummy_callback(&print_dummy);
-    sonar.add_message_callback(&print_all);
+    // sonar.add_dummy_callback(&print_dummy);  
+    sonar.message_callbacks().append(&print_all);
 
     ioService.start();
 
@@ -83,7 +84,9 @@ int main()
     auto config = default_ping_config();
     config.pingRate = PingRateType::PingRateStandby;
     sonar.send_ping_config(config);
-    sonar.on_next_dummy([](const OculusMessageHeader& header) { std::cout << "Got awaited dummy !" << std::endl; });
+    sonar.dummy_callbacks().append([](const OculusMessageHeader& header) { 
+        std::cout << "Got awaited dummy !" << std::endl; 
+    });
     std::cout << "After awaited dummy" << std::endl;
 
     // sonar.on_next_status([](const OculusStatusMsg& msg) {

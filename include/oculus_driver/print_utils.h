@@ -16,13 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *****************************************************************************/
 
-#ifndef _DEF_OCULUS_DRIVER_PRINT_UTILS_H_
-#define _DEF_OCULUS_DRIVER_PRINT_UTILS_H_
+#pragma once
 
 #include <iostream>
 #include <sstream>
+#include <string>
 
-#include <oculus_driver/Oculus.h>
+#include "oculus_driver/Oculus.h"
 
 namespace oculus {
 
@@ -52,5 +52,3 @@ std::ostream& operator<<(std::ostream& os, const OculusSimpleFireMessage& msg);
 std::ostream& operator<<(std::ostream& os, const OculusSimplePingResult& msg);
 std::ostream& operator<<(std::ostream& os, const OculusSimpleFireMessage2& msg);
 std::ostream& operator<<(std::ostream& os, const OculusSimplePingResult2& msg);
-
-#endif //_DEF_OCULUS_DRIVER_PRINT_UTILS_H_

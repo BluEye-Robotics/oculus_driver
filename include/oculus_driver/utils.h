@@ -16,17 +16,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *****************************************************************************/
 
-#ifndef _DEF_OCULUS_DRIVER_UTILS_H_
-#define _DEF_OCULUS_DRIVER_UTILS_H_
+#pragma once
 
-#include "boost/asio.hpp"
-#include "oculus_driver/Oculus.h"
-#include "oculus_driver/print_utils.h"
+#include <eventpp/callbacklist.h>
+#include <eventpp/utilities/counterremover.h>
 
+#include <atomic>
+#include <boost/asio.hpp>
 #include <iostream>
+
+#include "oculus_driver/Oculus.h"
+#include "print_utils.h"
 
 namespace oculus
 {
+    
+struct TimeoutReached : public std::exception {
+  const char* what() const throw() {
+    return "Timeout reached before callback call.";
+  }
+};
 
 template <typename EndPointT> inline EndPointT remote_from_status(const OculusStatusMsg& status)
 {
@@ -131,6 +140,26 @@ inline bool config_changed(const OculusSimpleFireMessage2& previous, const Oculu
     return false;
 }
 
-} // namespace oculus
+template <typename Prototype, typename Policies>
+bool timedCallback(eventpp::CallbackList<Prototype, Policies>& callbacks,
+                   auto& callback, int timeout_ms = 5000) {
+    std::atomic_flag called;
+    auto start = std::chrono::steady_clock::now();
+    auto handle = eventpp::counterRemover(callbacks).append(
+        [start, timeout_ms, &callback, &called](auto... args) {
+        if(std::chrono::steady_clock::now() - start <
+            std::chrono::milliseconds(timeout_ms)) {
+            callback(args...);
+            called.test_and_set();
+        }
+    });
 
-#endif //_DEF_OCULUS_DRIVER_UTILS_H_
+    while(!called.test() || std::chrono::steady_clock::now() - start <
+                                std::chrono::milliseconds(timeout_ms)) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+    callbacks.remove(handle);
+    return called.test();
+}
+
+} // namespace oculus

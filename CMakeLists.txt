@@ -12,6 +12,7 @@ find_package(Boost COMPONENTS system thread REQUIRED)
 pkg_check_modules(FMT fmt)
 find_package(spdlog REQUIRED)
 find_package(eventpp CONFIG REQUIRED)
+find_package(magic_enum REQUIRED)
 
 add_definitions(-DSPDLOG_COMPILED_LIB)
 add_definitions(-DSPDLOG_FMT_EXTERNAL=on)
@@ -30,6 +31,7 @@ target_include_directories(oculus_driver PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
     ${EVENTPP_INCLUDE_DIR}
+    ${magic_enum_INCLUDE_DIRS}
 )
 target_link_libraries(oculus_driver PUBLIC
     Boost::system
@@ -38,6 +40,7 @@ target_link_libraries(oculus_driver PUBLIC
     ${FMT_LIBRARIES}
 )
 target_compile_features(oculus_driver PUBLIC cxx_std_17)
+target_compile_definitions(oculus_driver PUBLIC MAGIC_ENUM_RANGE_MAX=1024)
 
 #############
 ## Install ##

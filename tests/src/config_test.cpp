@@ -45,8 +45,8 @@ int main()
     AsyncService ioService;
     SonarDriver sonar(ioService.io_service());
     
-    sonar.add_ping_callback(&print_ping);
-    sonar.add_dummy_callback(&print_dummy);
+    sonar.ping_callbacks().append(&print_ping);
+    sonar.dummy_callbacks().append(&print_dummy);
 
     ioService.start();
 
@@ -59,5 +59,3 @@ int main()
 
     return 0;
 }
-
-

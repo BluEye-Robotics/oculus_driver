@@ -258,7 +258,7 @@ typedef struct
     uint16_t deviceType; // was OculusDeviceType
     uint16_t partNumber; // was OculusPartNumberType
     uint32_t status;
-    OculusVersionInfo versinInfo;
+    OculusVersionInfo versionInfo;
     uint32_t ipAddr;
     uint32_t ipMask;
     uint32_t clientAddr;

@@ -212,6 +212,7 @@ void SonarClient::connect_callback(const boost::system::error_code& err)
     // this enters the ping data reception loop
     this->initiate_receive();
     this->on_connect();
+    connect_callbacks()();
 }
 
 void SonarClient::initiate_receive()

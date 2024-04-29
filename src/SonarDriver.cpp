@@ -155,7 +155,6 @@ void SonarDriver::on_connect()
     // This makes the oculus fire right away.
     // On first connection lastConfig_ is equal to default_ping_config().
     status_callbacks()(statusListener_.get_latest());
-    connect_callbacks()(true);
 }
 
 /**

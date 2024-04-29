@@ -89,7 +89,7 @@ class SonarClient
     
     StatusListener statusListener_;
     eventpp::CallbackList<void(const boost::system::error_code&)> errorCallbacks;
-    eventpp::CallbackList<void(bool)> connectCallbacks;
+    eventpp::CallbackList<void()> connectCallbacks;
     
 
     Message::Ptr message_;

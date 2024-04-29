@@ -18,6 +18,8 @@
 
 #include "oculus_driver/SonarClient.h"
 
+#include <magic_enum_all.hpp>
+
 namespace oculus
 {
 
@@ -177,7 +179,10 @@ void SonarClient::on_first_status(const OculusStatusMsg& msg)
         "- netip   : {}\n"
         "- netmask : {}\n"
         "- temp    : {}", // overheat?
-        ip_to_string(msg.ipAddr), ip_to_string(msg.ipMask), ((msg.status & 0x0000c000) >> 14));
+        ip_to_string(msg.ipAddr), ip_to_string(msg.ipMask), 
+        magic_enum::enum_name(
+            magic_enum::enum_cast<OculusTemperatureStatusType>((msg.status & 0x0000c000) >> 14)
+                .value_or(OculusTemperatureStatusType::TempReserved)));
 
     // attempting connection
     socket_ = std::make_unique<Socket>(*ioService_);

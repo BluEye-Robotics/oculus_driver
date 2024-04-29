@@ -1,9 +1,6 @@
 .*.sw*
+build
 *.oculus
 *.mp4
-*.log
-
-build/
-install/
-log/
-venv/
+build_imx
+.vscode

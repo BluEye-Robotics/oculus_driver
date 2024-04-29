@@ -175,8 +175,9 @@ void SonarClient::on_first_status(const OculusStatusMsg& msg)
     logger->info(
         "Got Oculus status:\n"
         "- netip   : {}\n"
-        "- netmask : {}",
-        ip_to_string(msg.ipAddr), ip_to_string(msg.ipMask));
+        "- netmask : {}\n"
+        "- temp    : {}", // overheat?
+        ip_to_string(msg.ipAddr), ip_to_string(msg.ipMask), ((msg.status & 0x0000c000) >> 14));
 
     // attempting connection
     socket_ = std::make_unique<Socket>(*ioService_);

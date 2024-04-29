@@ -23,9 +23,7 @@
 // to the new library format.).  With the pragma once approach both this header
 // and the one from the old library are included and it (rightfully) cause
 // multiple definition errors.
-// #pragma once
-#ifndef _DEF_OCULUS_DRIVER_OCULUS_TYPES_H_
-#define _DEF_OCULUS_DRIVER_OCULUS_TYPES_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -39,6 +37,8 @@
 
 // The test id contained in the oculus header file
 #define OCULUS_CHECK_ID 0x4f53
+
+namespace oculus {
 
 enum OculusMasterStatusType // : uint8_t
 {
@@ -516,6 +516,6 @@ typedef struct
     PingParameters ping_params;
 } OculusReturnFireMessage;
 
-#pragma pack(pop)
+} // namespace oculus
 
-#endif //_DEF_OCULUS_DRIVER_OCULUS_TYPES_H_
+#pragma pack(pop)

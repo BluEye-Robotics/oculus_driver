@@ -36,8 +36,8 @@ class SonarDriver : public SonarClient {
   using IoService = boost::asio::io_service;
   using IoServicePtr = std::shared_ptr<IoService>;
 
-  using PingConfig = OculusSimpleFireMessage;
-  using PingResult = OculusSimplePingResult;
+  using PingConfig = OculusSimpleFireMessage2;
+  using PingResult = OculusSimplePingResult2;
 
   using MessageCallback = std::function<void(const Message::ConstPtr&)>;
   using StatusCallback = std::function<void(const OculusStatusMsg&)>;
@@ -52,7 +52,6 @@ class SonarDriver : public SonarClient {
 
  protected:
   PingConfig lastConfig_;
-  uint8_t lastPingRate_;
 
   // message callbacks will be called on every received message.
   // config callbacks will be called on (detectable) configuration changes.
@@ -71,10 +70,6 @@ class SonarDriver : public SonarClient {
   PingConfig current_ping_config();
   PingConfig request_ping_config(PingConfig request);
   PingConfig last_ping_config() const;
-
-  // Stanby mode (saves current ping rate and set it to 0 on the sonar
-  void standby();
-  void resume();
 
   virtual void on_connect();
   virtual void handle_message(const Message::ConstPtr& message);

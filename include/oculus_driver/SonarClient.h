@@ -85,6 +85,7 @@ class SonarClient {
   Message::Ptr message_;
 
   eventpp::CallbackList<void(const boost::system::error_code&)> errorCallbacks;
+  eventpp::CallbackList<void()> connectCallbacks;
 
   // helper stubs
   void checker_callback(const boost::system::error_code& err);
@@ -105,7 +106,7 @@ class SonarClient {
   void close_connection();
   void on_first_status(const OculusStatusMsg& msg);
   void connect_callback(const boost::system::error_code& err);
-  virtual void on_connect();
+  virtual void on_connect() = 0;
 
   // main loop begin
   void initiate_receive();
@@ -116,7 +117,7 @@ class SonarClient {
 
   // This is called regardless of the content of the message.
   // To be reimplemented in a subclass (does nothing by default).
-  virtual void handle_message(const Message::ConstPtr& msg);
+  virtual void handle_message(const Message::ConstPtr& msg) = 0;
 
   template <typename TimeT = float>
   TimeT time_since_last_message() const {
@@ -125,8 +126,9 @@ class SonarClient {
 
   TimePoint last_header_stamp() const { return message_->timestamp(); }
 
-  auto& status_callbacks() { return statusListener_.callbacks(); }
-  auto& error_callbacks() { return errorCallbacks; }
+  inline auto& connect_callbacks() {return connectCallbacks; }
+  inline auto& status_callbacks() { return statusListener_.callbacks(); }
+  inline auto& error_callbacks() { return errorCallbacks; }
 };
 
 }  // namespace oculus

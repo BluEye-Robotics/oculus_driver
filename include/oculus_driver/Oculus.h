@@ -42,97 +42,149 @@
 
 enum OculusMasterStatusType  // : uint8_t
 {
-  oculusMasterStatusSsblBoot,
-  oculusMasterStatusSsblRun,
-  oculusMasterStatusMainBoot,
-  oculusMasterStatusMainRun,
+  MasterStatusSsblBoot,
+  MasterStatusSsblRun,
+  MasterStatusMainBoot,
+  MasterStatusMainRun,
 };
 
 enum OculusPauseReasonType  // : uint8_t
 {
-  oculusPauseMagSwitch,
-  oculusPauseBootFromMain,
-  oculusPauseFlashError,
-  oculusPauseJtagLoad,
+  PauseMagSwitch = 0,
+  PauseBootFromMain = 1,
+  PauseFlashError = 2,
+  PauseJtagLoad = 3,
+  PauseFirmwareError = 4,
+  PauseCompatibilityError = 5,
+  PauseBrownout = 6,
+  PauseUndefined = 7,
 };
 
 enum OculusTemperatureStatusType  // : uint8_t
 {
-  oculusTempGood,
-  oculusTempOverheat,
-  oculusTempReserved,
-  oculusTempOvermax,
+  TempGood = 0,
+  TempOverheat = 1,
+  TempReserved = 2,
+  TempOverMax = 3,
 };
 
 // -----------------------------------------------------------------------------
 enum OculusDeviceType  // : uint16_t
 {
-  deviceTypeUndefined = 0,
-  deviceTypeImagingSonar = 1,
+  DeviceTypeUndefined = 0,
+  DeviceTypeImagingSonar = 1,
 };
 
 // -----------------------------------------------------------------------------
 enum OculusMessageType  // : uint16_t
 {
-  messageSimpleFire = 0x15,
-  messagePingResult = 0x22,
-  messageSimplePingResult = 0x23,
-  messageUserConfig = 0x55,
-  messageDummy = 0xff,
+  MsgStatus = 0x01,
+  MsgSimpleFire = 0x15,
+  MsgPingResult = 0x22,
+  MsgSimplePingResult = 0x23,
+  MsgUserConfig = 0x55,
+  MsgBootInfo = 0x80,
+  MsgDummy = 0xff
 };
 
+// -----------------------------------------------------------------------------
 enum PingRateType  // : uint8_t
 {
-  pingRateNormal = 0x00,   // 10Hz max ping rate
-  pingRateHigh = 0x01,     // 15Hz max ping rate
-  pingRateHighest = 0x02,  // 40Hz max ping rate
-  pingRateLow = 0x03,      // 5Hz max ping rate
-  pingRateLowest = 0x04,   // 2Hz max ping rate
-  pingRateStandby = 0x05,  // Disable ping
+  PingRateNormal = 0x00,   // 10Hz max ping rate (Default rate)
+  PingRateHigh = 0x01,     // 15Hz max ping rate
+  PingRateHighest = 0x02,  // 40Hz max ping rate
+  PingRateLow = 0x03,      // 5Hz max ping rate
+  PingRateLowest = 0x04,   // 2Hz max ping rate
+  PingRateStandby = 0x05,  // Disable ping
 };
 
 // -----------------------------------------------------------------------------
 enum DataSizeType  // : uint8_t
 {
-  dataSize8Bit,
-  dataSize16Bit,
-  dataSize24Bit,
-  dataSize32Bit,
+  ImageData8Bit = 0,
+  ImageData16Bit = 1,
+  ImageData24Bit = 2,
+  ImageData32Bit = 3,
+};
+
+// -----------------------------------------------------------------------------
+enum OculusPartNumberType  // : uint16_t
+{
+  Undefined = 0,
+  M370s = 1041,
+  MT370s = 2418,
+  MD370s = 1433,
+  MF370s = 1436,
+  MA370s = 1229,
+  M750d = 1032,
+  MT750d = 2419,
+  MD750d = 1434,
+  MF750d = 1134,
+  MA750d = 1135,
+  M1200d = 1042,
+  MT1200d = 2420,
+  MD1200d = 1435,
+  MF1200d = 1437,
+  MA1200d = 1228,
+  M3000d = 2203,
+  MT3000d = 2599,
+  MF3000d = 2466,
+  MA3000d = 2924,
+  partNumberEnd = 0xFFFF
 };
 
 // -----------------------------------------------------------------------------
 
 typedef struct {
-  uint16_t oculusId;     // Fixed ID 0x4f53
+  uint16_t oculusId;     // Fixed for Oculus Sonar: 0x4f53
   uint16_t srcDeviceId;  // The device id of the source
   uint16_t dstDeviceId;  // The device id of the destination
   uint16_t msgId;        // Message identifier
   uint16_t msgVersion;
   uint32_t
       payloadSize;  // The size of the message payload (header not included)
-  uint16_t spare2;
+  uint16_t partNumber;
 } OculusMessageHeader;
 
 // -----------------------------------------------------------------------------
 typedef struct {
   OculusMessageHeader head;  // The standard message header
 
-  uint8_t
-      masterMode;    // mode 0 is flexi mode, needs full fire message (not
-                     // available for third party developers) mode 1 - Low
-                     // Frequency Mode (wide aperture, navigation) mode 2 - High
-                     // Frequency Mode (narrow aperture, target identification)
-  uint8_t pingRate;  // Sets the maximum ping rate. was PingRateType
+  /**
+   * @brief Master mode
+   * mode 1 - Low Frequency (wide aperture, navigation)
+   * mode 2 - High Frequency (narrow aperture, target identification)
+   */
+  uint8_t masterMode;
+
+  /**
+   * @brief Ping rate
+   *
+   * Sets the maximum ping rate
+   * @sa PingRateType
+   */
+  uint8_t pingRate;
+
+  /**
+   * @brief Network speed
+   *
+   *
+   */
   uint8_t networkSpeed;  // Used to reduce the network comms speed (useful for
                          // high latency shared links)
   uint8_t gammaCorrection;  // 0 and 0xff = gamma correction = 1.0
                             // Set to 127 for gamma correction = 0.5
   uint8_t
-      flags;  // bit 0: 0 = interpret range as percent, 1 = interpret range as
-              // meters bit 1: 0 = 8 bit data, 1 = 16 bit data // inverted ? bit
-              // 2: 0 = wont send gain, 1 = send gain bit 3: 0 = send full
-              // return message, 1 = send simple return message bit 4: gain
-              // assist ? bit 5: ? bit 6: enable 512 beams bit 7: ?
+      flags;  // bit 0: [RangeInMetres]  1: Metres. 0: Percentage.
+              // bit 1: [16BitImg]       1: 16-bit. 0: 8-bit.
+              // bit 2: [GainSend]       1: Return the gain at the start of each
+              // line. 0: No gain return bit 3: [SimpleReturn]   1: Ouput simple
+              // fire returns. 0: Output full fire returns if full fire sent.
+              // bit 4: [GainAssist]     1: Gain assist disabled. 0: Gain assist
+              // enabled. bit 5: [LowPower]       1: Low power mode enabled. 0:
+              // Disabled. bit 6: [FullBeams]      1: Use 512 beams. 0: Use 256
+              // beams. bit 7: [NetworkTrigger] 1: Only fires when instructed.
+              // 0: Fires automatically according to PingRate.
   double range;         // The range demand in percent or m depending on flags
   double gainPercent;   // The gain demand
   double speedOfSound;  // ms-1, if set to zero then internal calc will apply
@@ -149,7 +201,7 @@ typedef struct {
   uint8_t gammaCorrection;  // The gamma correction - 255 is equal to a gamma
                             // correction of 1.0
   uint8_t flags;
-  double rangePercent;  // The range demand (%)
+  double range;         // The range demand (%)
   double gainPercent;   // The percentage gain
   double speedOfSound;  // The speed of sound - set to zero to use internal
                         // calculations

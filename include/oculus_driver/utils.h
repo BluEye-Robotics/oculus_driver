@@ -52,8 +52,8 @@ inline bool is_ping_message(const OculusMessageHeader& header) {
   return header_valid(header) && header.msgId == messageSimplePingResult;
 }
 
-inline OculusSimpleFireMessage default_ping_config() {
-  OculusSimpleFireMessage msg;
+inline OculusSimpleFireMessage2 default_ping_config() {
+  OculusSimpleFireMessage2 msg = {0};
   std::memset(&msg, 0, sizeof(msg));
 
   msg.head.oculusId = OCULUS_CHECK_ID;
@@ -61,7 +61,7 @@ inline OculusSimpleFireMessage default_ping_config() {
   msg.head.srcDeviceId = 0;
   msg.head.dstDeviceId = 0;
   msg.head.payloadSize =
-      sizeof(OculusSimpleFireMessage) - sizeof(OculusMessageHeader);
+      sizeof(OculusSimpleFireMessage2) - sizeof(OculusMessageHeader);
 
   msg.masterMode = 2;
   msg.networkSpeed = 0xff;
@@ -87,8 +87,8 @@ inline OculusSimpleFireMessage default_ping_config() {
   return msg;
 }
 
-inline bool check_config_feedback(const OculusSimpleFireMessage& requested,
-                                  const OculusSimpleFireMessage& feedback) {
+inline bool check_config_feedback(const OculusSimpleFireMessage2& requested,
+                                  const OculusSimpleFireMessage2& feedback) {
   // returns true if feedback coherent with requested config.
   if (requested.pingRate == pingRateStandby) {
     // If in standby, expecting a dummy message
@@ -121,8 +121,8 @@ inline bool check_config_feedback(const OculusSimpleFireMessage& requested,
   return false;
 }
 
-inline bool config_changed(const OculusSimpleFireMessage& previous,
-                           const OculusSimpleFireMessage& next) {
+inline bool config_changed(const OculusSimpleFireMessage2& previous,
+                           const OculusSimpleFireMessage2& next) {
   if (previous.masterMode != next.masterMode) return true;
   if (previous.pingRate != next.pingRate) return true;
   if (previous.networkSpeed != next.networkSpeed) return true;

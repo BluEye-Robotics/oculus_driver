@@ -25,14 +25,14 @@ SonarDriver::SonarDriver(const IoServicePtr &service,
                          const std::shared_ptr<spdlog::logger> &logger,
                          const Duration &checkerPeriod)
     : SonarClient(service, logger, checkerPeriod),
-      lastConfig_(default_ping_config()),
-      lastPingRate_(pingRateNormal) {}
+      lastConfig_(default_ping_config()) {}
 
 bool SonarDriver::send_ping_config(PingConfig config) {
   config.head.oculusId = OCULUS_CHECK_ID;
   config.head.msgId = messageSimpleFire;
   config.head.srcDeviceId = 0;
   config.head.dstDeviceId = sonarId_;
+  config.head.msgVersion = 0x0200;
   config.head.payloadSize = sizeof(PingConfig) - sizeof(OculusMessageHeader);
 
   // Other non runtime-configurable parameters (TODO : make then launch
@@ -54,13 +54,9 @@ bool SonarDriver::send_ping_config(PingConfig config) {
   // feedback saying if this parameter is effectively set by the sonar. The
   // line below allows to keep a trace of the requested ping rate but there
   // is no clean way to check.
+  logger->info("Updating lastConfig_.pingRate to {}", config.pingRate);
   lastConfig_.pingRate = config.pingRate;
 
-  // Also saving the last pingRate which is not standby to be able to resume
-  // the sonar to the last ping rate in the resume() method.
-  if (lastConfig_.pingRate != pingRateStandby) {
-    lastPingRate_ = lastConfig_.pingRate;
-  }
   return true;
 }
 
@@ -117,22 +113,6 @@ SonarDriver::PingConfig SonarDriver::request_ping_config(PingConfig request) {
   return feedback;
 }
 
-void SonarDriver::standby() {
-  auto request = lastConfig_;
-
-  request.pingRate = pingRateStandby;
-
-  this->send_ping_config(request);
-}
-
-void SonarDriver::resume() {
-  auto request = lastConfig_;
-
-  request.pingRate = lastPingRate_;
-
-  this->send_ping_config(request);
-}
-
 /**
  * Called when the driver first connection with the sonar.
  *
@@ -141,8 +121,9 @@ void SonarDriver::resume() {
 void SonarDriver::on_connect() {
   // This makes the oculus fire right away.
   // On first connection lastConfig_ is equal to default_ping_config().
-  this->send_ping_config(lastConfig_);
+  // this->send_ping_config(lastConfig_);
   status_callbacks()(statusListener_.get_latest());
+  connect_callbacks()();
 }
 
 /**
@@ -151,13 +132,18 @@ void SonarDriver::on_connect() {
 void SonarDriver::handle_message(const Message::ConstPtr &message) {
   const auto &header = message->header();
   const auto &data = message->data();
-  OculusSimpleFireMessage newConfig = lastConfig_;
+  auto newConfig = lastConfig_;
   switch (header.msgId) {
     case messageSimplePingResult:
       newConfig = reinterpret_cast<const OculusSimplePingResult *>(data.data())
                       ->fireMessage;
-      newConfig.pingRate =
-          lastConfig_.pingRate;  // feedback is broken on pingRate
+
+      logger->trace("Received ping rate: {}. Last ping rate: {}",
+                   newConfig.pingRate, lastConfig_.pingRate);
+
+      // feedback is broken on pingRate
+      newConfig.pingRate = lastConfig_.pingRate;
+
       // When masterMode = 2, the sonar force gainPercent between 40& and
       // 100%, BUT still needs resquested gainPercent to be between 0%
       // and 100%. (If you request a gainPercent=0 in masterMode=2, the
@@ -165,10 +151,13 @@ void SonarDriver::handle_message(const Message::ConstPtr &message) {
       // rescaled here to ensure consistent parameter handling on client
       // side).
       if (newConfig.masterMode == 2) {
+        logger->info("old gainPercent: {}", newConfig.gainPercent);
         newConfig.gainPercent = (newConfig.gainPercent - 40.0) * 100.0 / 60.0;
+        logger->info("new gainPercent: {}", newConfig.gainPercent);
       }
       break;
     case messageDummy:
+      logger->trace("Dummy message received. Changing ping rate to standby");
       newConfig.pingRate = pingRateStandby;
       break;
     default:

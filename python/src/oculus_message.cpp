@@ -1,3 +1,5 @@
+#include "oculus_message.h"
+
 #include <pybind11/pybind11.h>
 #include <pybind11/chrono.h>
 namespace py = pybind11;
@@ -12,6 +14,7 @@ namespace py = pybind11;
 
 #include "message_utils.h"
 
+// NOLINTNEXTLINE(runtime/references)
 void init_oculus_message(py::module& m_)
 {
     py::class_<oculus::Message, oculus::Message::Ptr>(m_, "OculusMessage")
@@ -39,11 +42,12 @@ void init_oculus_message(py::module& m_)
             return make_memory_view(msg->data());
         })
         .def("metadata", [](const oculus::PingMessage::ConstPtr& msg) {
-            if(msg->message()->message_version() == 2) {
-                return py::cast(*reinterpret_cast<const OculusSimplePingResult2*>(msg->data().data()));
-            }
-            else {
-                return py::cast(*reinterpret_cast<const OculusSimplePingResult*>(msg->data().data()));
+            if (msg->message()->message_version() == 2) {
+                auto data = reinterpret_cast<const OculusSimplePingResult2*>(msg->data().data());
+                return py::cast(*data);
+            } else {
+                auto data = reinterpret_cast<const OculusSimplePingResult*>(msg->data().data());
+                return py::cast(*data);
             }
         })
 
@@ -66,7 +70,8 @@ void init_oculus_message(py::module& m_)
             return make_ping_data_view(*msg);
         })
         .def("ping_index",          &oculus::PingMessage::ping_index)
-        //.def("ping_firing_date",    &oculus::PingMessage::ping_firing_date) // broken on hardware side ?
+        // ping_firing_date broken on hardware side ?
+        // .def("ping_firing_date",    &oculus::PingMessage::ping_firing_date)
         .def("range",               &oculus::PingMessage::range)
         .def("gain_percent",        &oculus::PingMessage::gain_percent)
         .def("frequency",           &oculus::PingMessage::frequency)
@@ -79,7 +84,7 @@ void init_oculus_message(py::module& m_)
                 msg->timestamp().time_since_epoch()).count();
         });
 
-        //m_.def("ping_message_from_bytes", [](py::bytes data) {
+        // m_.def("ping_message_from_bytes", [](py::bytes data) {
         m_.def("ping_message_from_bytes", [](py::bytes data,
                 const oculus::Message::TimePoint& stamp)
         {
@@ -88,7 +93,3 @@ void init_oculus_message(py::module& m_)
                                                (const uint8_t*)view.data());
         }, py::arg("data"), py::arg("stamp") = oculus::Message::TimePoint());
 }
-
-
-
-

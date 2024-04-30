@@ -39,7 +39,7 @@ int main()
     StatusListener listener(ioService, spdlog::get("console"));
 
     listener.callbacks().append(&print_callback);
-    
+
     ioService->run();  // is blocking
 
     return 0;

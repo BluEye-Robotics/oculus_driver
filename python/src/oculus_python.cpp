@@ -14,43 +14,43 @@ inline void message_callback_wrapper(py::object callback, const oculus::Message:
 {
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure();
-    
+
     callback(py::cast(msg));
 
     PyGILState_Release(gstate);
 }
 
-inline void ping_callback_wrapper(py::object callback, 
+inline void ping_callback_wrapper(py::object callback,
                                   const oculus::PingMessage::ConstPtr& msg)
 {
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure();
-    
+
     callback(py::cast(msg));
-    
+
     PyGILState_Release(gstate);
 }
 
-inline void status_callback_wrapper(py::object callback, 
+inline void status_callback_wrapper(py::object callback,
                                     const OculusStatusMsg& status)
 {
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure();
-    
+
     callback(py::cast(&status));
-    
+
     PyGILState_Release(gstate);
 }
 
-inline void config_callback_wrapper(py::object callback, 
+inline void config_callback_wrapper(py::object callback,
                                     const OculusSimpleFireMessage& lastConfig,
                                     const OculusSimpleFireMessage& newConfig)
 {
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure();
-    
+
     callback(py::cast(&lastConfig), py::cast(&newConfig));
-    
+
     PyGILState_Release(gstate);
 }
 
@@ -101,7 +101,7 @@ struct OculusPythonHandle
     }
 
     void recorder_start(const std::string& filename, bool overwrite) {
-        if(recorder_.is_open()) {
+        if (recorder_.is_open()) {
             return;
         }
         recorder_.open(filename, overwrite);
@@ -111,7 +111,7 @@ struct OculusPythonHandle
     }
     void recorder_stop() {
         recorder_.close();
-        if(recorderCallbackId_ > 0) {
+        if (recorderCallbackId_ > 0) {
             sonar_.remove_message_callback(recorderCallbackId_);
         }
     }
@@ -239,11 +239,11 @@ PYBIND11_MODULE(_oculus_python, m_)
         .def_readonly("firmwareDate1",    &OculusVersionInfo::firmwareDate1)
         .def_readonly("firmwareVersion2", &OculusVersionInfo::firmwareVersion2)
         .def_readonly("firmwareDate2",    &OculusVersionInfo::firmwareDate2);
-        //.def("__str__", [](const OculusVersionInfo& version) {
+        // .def("__str__", [](const OculusVersionInfo& version) {
         //    std::ostringstream oss;
         //    oss << version;
         //    return oss.str();
-        //});
+        // });
 
     py::class_<OculusStatusMsg>(m_, "OculusStatusMsg")
         .def(py::init<>())
@@ -298,7 +298,3 @@ PYBIND11_MODULE(_oculus_python, m_)
     init_oculus_message(m_);
     init_oculus_python_files(m_);
 }
-
-
-
-

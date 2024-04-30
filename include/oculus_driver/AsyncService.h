@@ -16,8 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *****************************************************************************/
 
-#ifndef _DEF_OCULUS_DRIVER_ASYNC_SERVICE_H_
-#define _DEF_OCULUS_DRIVER_ASYNC_SERVICE_H_
+#pragma once
 
 #include <iostream>
 #include <thread>
@@ -53,5 +52,3 @@ class AsyncService
 };
 
 }  // namespace oculus
-
-#endif //_DEF_OCULUS_DRIVER_ASYNC_SERVICE_H_

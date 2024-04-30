@@ -1,8 +1,13 @@
+#include "oculus_files.h"
+
 #include <pybind11/pybind11.h>
 namespace py = pybind11;
 
 #include <oculus_driver/Oculus.h>
 #include <oculus_driver/Recorder.h>
+
+#include <string>
+#include <vector>
 
 #include "oculus_message.h"
 
@@ -13,24 +18,25 @@ struct OculusFileReader
     oculus::blueprint::LogItem   msgHeader_;
     std::vector<uint8_t>         data_;
 
-    OculusFileReader(const std::string& path) : file_(path) {}
+    explicit OculusFileReader(const std::string& path) : file_(path) {}
 
     const oculus::blueprint::LogHeader file_header() const { return file_.file_header(); }
     py::object read_next_message() const {
         auto msg = file_.read_next_message();
-        if(msg)
+        if (msg) {
             return py::cast(msg.get());
-        else
+        } else {
             return py::none();
+        }
     }
 
     py::object read_next_ping() const {
         auto msg = file_.read_next_ping();
-        if(msg) {
+        if (msg) {
             return py::cast(msg);
-        }
-        else
+        } else {
             return py::none();
+        }
     }
 
     void rewind() {
@@ -38,6 +44,7 @@ struct OculusFileReader
     }
 };
 
+// NOLINTNEXTLINE(runtime/references)
 void init_oculus_python_files(py::module& parentModule)
 {
     py::module m_ = parentModule.def_submodule("files", "Submodule to read .oculus files.");
@@ -93,5 +100,3 @@ void init_oculus_python_files(py::module& parentModule)
         .def("read_next_ping",    &OculusFileReader::read_next_ping)
         .def("rewind",            &OculusFileReader::rewind);
 }
-
-

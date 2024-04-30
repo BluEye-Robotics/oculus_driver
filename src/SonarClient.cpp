@@ -53,7 +53,7 @@ size_t SonarClient::send(const boost::asio::streambuf& buffer) const
 {
     std::unique_lock<std::mutex> lock(socketMutex_);  // auto lock
 
-    if(!socket_ || !this->connected()) return 0;
+    if (!socket_ || !this->connected()) return 0;
     return socket_->send(buffer.data());
 }
 
@@ -66,13 +66,13 @@ size_t SonarClient::send(const boost::asio::streambuf& buffer) const
  */
 void SonarClient::checker_callback(const boost::system::error_code& err)
 {
-    if(err)
+    if (err)
     {
         logger->error("Checker error: {}", err.message());
         return;
     }
 
-    if(checkerTimer_.expires_at() == boost::posix_time::neg_infin)
+    if (checkerTimer_.expires_at() == boost::posix_time::neg_infin)
     {
         logger->error("Checker timer cancelled");
         return;
@@ -83,14 +83,14 @@ void SonarClient::checker_callback(const boost::system::error_code& err)
     this->checkerTimer_.async_wait(
         std::bind(&SonarClient::checker_callback, this, std::placeholders::_1));
 
-    if(connectionState_ == Initializing || connectionState_ == Attempt)
+    if (connectionState_ == Initializing || connectionState_ == Attempt)
     {
         // Nothing more to be done. Waiting.
         return;
     }
 
     auto lastStatusTime = statusListener_.time_since_last_status();
-    if(lastStatusTime > 5)
+    if (lastStatusTime > 5)
     {
         // The status is retrieved through broadcasted UDP packets. No status
         // means no sonar on the network -> no chance to connect.
@@ -101,7 +101,7 @@ void SonarClient::checker_callback(const boost::system::error_code& err)
         return;
     }
 
-    if(this->time_since_last_message() > 10)
+    if (this->time_since_last_message() > 10)
     {
         // Here last status was received less than 5 seconds ago but the last
         // message is more than 10s old. The connection is probably broken and
@@ -116,7 +116,7 @@ void SonarClient::checker_callback(const boost::system::error_code& err)
 void SonarClient::check_reception(const boost::system::error_code& err)
 {
     // no real handling for now
-    if(err)
+    if (err)
     {
         logger->error("Reception error : {}", err.message());
     }
@@ -141,14 +141,14 @@ void SonarClient::close_connection()
     std::unique_lock<std::mutex> lock(socketMutex_);
     this->checkerTimer_.cancel();
     checkerTimer_.expires_at(boost::posix_time::neg_infin);
-    if(socket_)
+    if (socket_)
     {
         logger->info("Socket open. Closing now");
         try
         {
             boost::system::error_code err;
             socket_->shutdown(boost::asio::ip::tcp::socket::shutdown_both, err);
-            if(err)
+            if (err)
             {
                 logger->error("Error closing socket : {} - {}", err.value(), err.message());
                 return;
@@ -192,7 +192,7 @@ void SonarClient::on_first_status(const OculusStatusMsg& msg)
 
 void SonarClient::connect_callback(const boost::system::error_code& err)
 {
-    if(err)
+    if (err)
     {
         logger->error("Connection failure : {}. Remote: {}", err.message(),
                     remote_.address().to_string());
@@ -219,7 +219,7 @@ void SonarClient::connect_callback(const boost::system::error_code& err)
 void SonarClient::initiate_receive()
 {
     std::unique_lock<std::mutex> lock(socketMutex_);
-    if(!socket_) return;
+    if (!socket_) return;
     // asynchronously scan input until finding a valid header.
     // /!\ To be checked : This function and its callback handle the data
     // synchronization with the start of the ping message. It is relying on the
@@ -248,7 +248,7 @@ void SonarClient::header_received_callback(const boost::system::error_code err,
     // TODO : check this last statement. Checked : wrong.
     // Other message types seem to be sent but are not documented by Oculus).
     this->check_reception(err);
-    if(receivedByteCount != sizeof(message_->header_) || !this->is_valid(message_->header_))
+    if (receivedByteCount != sizeof(message_->header_) || !this->is_valid(message_->header_))
     {
         // Either we got data in the middle of a ping or did not get enougth
         // bytes (end of message). Continue listening to get a valid header.
@@ -263,7 +263,7 @@ void SonarClient::header_received_callback(const boost::system::error_code err,
     message_->update_from_header();
     {
         std::unique_lock<std::mutex> lock(socketMutex_);
-        if(!socket_) return;
+        if (!socket_) return;
         boost::asio::async_read(
             *socket_,
             boost::asio::buffer(message_->payload_handle(),
@@ -276,7 +276,7 @@ void SonarClient::data_received_callback(const boost::system::error_code err,
                                          std::size_t receivedByteCount)
 {
     logger->trace("Data received callback");
-    if(receivedByteCount != message_->header_.payloadSize)
+    if (receivedByteCount != message_->header_.payloadSize)
     {
         // We did not get enough bytes. Reinitiating reception.
         logger->error("Data reception error");

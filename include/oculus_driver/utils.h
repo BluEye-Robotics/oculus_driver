@@ -89,18 +89,18 @@ inline OculusSimpleFireMessage2 default_ping_config()
 inline bool check_config_feedback(const OculusSimpleFireMessage2& requested, const OculusSimpleFireMessage2& feedback)
 {
     // returns true if feedback coherent with requested config.
-    if(requested.pingRate == PingRateType::PingRateStandby)
+    if (requested.pingRate == PingRateType::PingRateStandby)
     {
         // If in standby, expecting a dummy message
-        if(feedback.head.msgId == OculusMessageType::MsgDummy) return true;
+        if (feedback.head.msgId == OculusMessageType::MsgDummy) return true;
     }
     else
     {
         // If got a simple ping result, checking relevant parameters
-        if(feedback.head.msgId == OculusMessageType::MsgSimplePingResult &&
+        if (feedback.head.msgId == OculusMessageType::MsgSimplePingResult &&
            requested.masterMode == feedback.masterMode
            // feedback is broken on pingRate field
-           //&& requested.pingRate         == feedback.pingRate
+           // && requested.pingRate         == feedback.pingRate
            && requested.gammaCorrection == feedback.gammaCorrection && requested.flags == feedback.flags &&
            requested.range == feedback.range && std::abs(requested.gain - feedback.gain) < 1.0e-1)
         {
@@ -110,13 +110,13 @@ inline bool check_config_feedback(const OculusSimpleFireMessage2& requested, con
             // For now simple ping is ok. Checking sound speed / salinity
             // parameters If speed of sound is 0.0, the sonar is using salinity
             // to calculate speed of sound.
-            if(requested.speedOfSound != 0.0)
+            if (requested.speedOfSound != 0.0)
             {
-                if(std::abs(requested.speedOfSound - feedback.speedOfSound) < 1.0e-1) return true;
+                if (std::abs(requested.speedOfSound - feedback.speedOfSound) < 1.0e-1) return true;
             }
             else
             {
-                if(std::abs(requested.salinity - feedback.salinity) < 1.0e-1) return true;
+                if (std::abs(requested.salinity - feedback.salinity) < 1.0e-1) return true;
             }
         }
     }
@@ -126,16 +126,16 @@ inline bool check_config_feedback(const OculusSimpleFireMessage2& requested, con
 inline bool config_changed(const OculusSimpleFireMessage2& previous, const OculusSimpleFireMessage2& next)
 {
 
-    if(previous.masterMode != next.masterMode) return true;
-    if(previous.pingRate != next.pingRate) return true;
-    if(previous.networkSpeed != next.networkSpeed) return true;
-    if(previous.gammaCorrection != next.gammaCorrection) return true;
-    if(previous.flags != next.flags) return true;
+    if (previous.masterMode != next.masterMode) return true;
+    if (previous.pingRate != next.pingRate) return true;
+    if (previous.networkSpeed != next.networkSpeed) return true;
+    if (previous.gammaCorrection != next.gammaCorrection) return true;
+    if (previous.flags != next.flags) return true;
 
-    if(abs(previous.range - next.range) > 0.001) return true;
-    if(abs(previous.gain - next.gain) > 0.1) return true;
-    if(abs(previous.speedOfSound - next.speedOfSound) > 0.1) return true;
-    if(abs(previous.salinity - next.salinity) > 0.1) return true;
+    if (abs(previous.range - next.range) > 0.001) return true;
+    if (abs(previous.gain - next.gain) > 0.1) return true;
+    if (abs(previous.speedOfSound - next.speedOfSound) > 0.1) return true;
+    if (abs(previous.salinity - next.salinity) > 0.1) return true;
 
     return false;
 }
@@ -147,16 +147,16 @@ bool timedCallback(eventpp::CallbackList<Prototype, Policies>& callbacks,
     auto start = std::chrono::steady_clock::now();
     auto handle = eventpp::counterRemover(callbacks).append(
         [start, timeout_ms, &callback, &called](auto... args) {
-        if(std::chrono::steady_clock::now() - start <
+        if (std::chrono::steady_clock::now() - start <
             std::chrono::milliseconds(timeout_ms)) {
             callback(args...);
             called.test_and_set();
         }
     });
 
-    while(!called.test() || std::chrono::steady_clock::now() - start <
+    while (!called.test() || std::chrono::steady_clock::now() - start <
                                 std::chrono::milliseconds(timeout_ms)) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for (std::chrono::milliseconds(100));
     }
     callbacks.remove(handle);
     return called.test();

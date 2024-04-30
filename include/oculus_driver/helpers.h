@@ -14,7 +14,7 @@ inline void write_pgm(const std::string& filename,
                       const uint8_t* data)
 {
     std::ofstream f(filename, std::ios::out | std::ios::binary);
-    if(!f.is_open()) {
+    if (!f.is_open()) {
         std::ostringstream oss;
         oss << "Could not open file for writing : " << filename;
         throw std::runtime_error(oss.str());
@@ -33,7 +33,7 @@ inline void write_pgm(const std::string& filename,
 {
     float m = data[0];
     float M = data[0];
-    for(unsigned int i = 0; i < width*height; i++) {
+    for (unsigned int i = 0; i < width*height; i++) {
         m = std::min(m, data[i]);
         M = std::max(M, data[i]);
     }
@@ -41,7 +41,7 @@ inline void write_pgm(const std::string& filename,
     float a = 255.0 / (M - m);
     float b = -m * a;
     std::vector<uint8_t> imageData(width*height);
-    for(unsigned int i = 0; i < width*height; i++) {
+    for (unsigned int i = 0; i < width*height; i++) {
         imageData[i] = a*data[i] + b;
     }
     write_pgm(filename, width, height, imageData.data());
@@ -121,42 +121,42 @@ inline void ping_data_to_array(T* dst,
                                const OculusPingResultType& metadata,
                                const std::vector<uint8_t>& pingData)
 {
-    if(has_16bits_data(metadata)) {
+    if (has_16bits_data(metadata)) {
         auto data = (const uint16_t*)(pingData.data() + metadata.imageOffset);
-        if(has_gains(metadata)) {
+        if (has_gains(metadata)) {
             // gain is sent
-            for(unsigned int h = 0; h < metadata.nRanges; h++) {
+            for (unsigned int h = 0; h < metadata.nRanges; h++) {
                 float gain = 1.0f / sqrt((float)((const uint32_t*)data)[0]);
                 data += 2;
-                for(int w = 0; w < metadata.nBeams; w++) {
+                for (int w = 0; w < metadata.nBeams; w++) {
                     dst[metadata.nBeams*w + h] = gain * data[w];
                 }
                 data += metadata.nBeams;
             }
         }
         else {
-            //gain was not sent
-            for(unsigned int i = 0; i < metadata.nBeams*metadata.nRanges; i++) {
+            // gain was not sent
+            for (unsigned int i = 0; i < metadata.nBeams*metadata.nRanges; i++) {
                 dst[i] = data[i];
             }
         }
     }
     else {
         auto data = (const uint8_t*)(pingData.data() + metadata.imageOffset);
-        if(has_gains(metadata)) {
+        if (has_gains(metadata)) {
             // gain is sent
-            for(unsigned int h = 0; h < metadata.nRanges; h++) {
+            for (unsigned int h = 0; h < metadata.nRanges; h++) {
                 float gain = 1.0f / sqrt((float)((const uint32_t*)data)[0]);
                 data += 4;
-                for(int w = 0; w < metadata.nBeams; w++) {
+                for (int w = 0; w < metadata.nBeams; w++) {
                     dst[metadata.nBeams*w + h] = gain * data[w];
                 }
                 data += metadata.nBeams;
             }
         }
         else {
-            //gain was not sent
-            for(unsigned int i = 0; i < metadata.nBeams*metadata.nRanges; i++) {
+            // gain was not sent
+            for (unsigned int i = 0; i < metadata.nBeams*metadata.nRanges; i++) {
                 dst[i] = data[i];
             }
         }
@@ -165,10 +165,10 @@ inline void ping_data_to_array(T* dst,
 inline std::vector<float> get_ping_acoustic_data(const std::vector<uint8_t>& pingData)
 {
     auto header = *reinterpret_cast<const OculusMessageHeader*>(pingData.data());
-    if(header.msgId != MsgSimplePingResult) {
+    if (header.msgId != MsgSimplePingResult) {
         throw std::runtime_error("Not a ping result");
     }
-    if(header.msgVersion != 2) {
+    if (header.msgVersion != 2) {
         auto metadata = *reinterpret_cast<const OculusSimplePingResult*>(pingData.data());
         std::vector<float> dst(metadata.nBeams * metadata.nRanges);
         ping_data_to_array(dst.data(), metadata, pingData);
@@ -192,17 +192,17 @@ inline void get_ping_bearings(T* dst,
 {
     // copying bearing angles (
     auto bearingData = (const int16_t*)(pingData.data() + sizeof(OculusPingResultType));
-    for(unsigned int i = 0; i < metadata.nBeams; i++) {
+    for (unsigned int i = 0; i < metadata.nBeams; i++) {
         dst[i] = (0.01 * M_PI / 180.0) * bearingData[i];
     }
 }
 inline std::vector<float> get_ping_bearings(const std::vector<uint8_t>& pingData)
 {
     auto header = *reinterpret_cast<const OculusMessageHeader*>(pingData.data());
-    if(header.msgId != MsgSimplePingResult) {
+    if (header.msgId != MsgSimplePingResult) {
         throw std::runtime_error("Not a ping result");
     }
-    if(header.msgVersion != 2) {
+    if (header.msgVersion != 2) {
         auto metadata = *reinterpret_cast<const OculusSimplePingResult*>(pingData.data());
         std::vector<float> dst(metadata.nBeams);
         get_ping_bearings(dst.data(), metadata, pingData);
@@ -249,14 +249,14 @@ inline std::pair<unsigned int, unsigned int> image_from_ping_data(
     // Making a lookup table to rapidly get bearing index from a bearing angle.
     // This comes down to performing a nearest neighbour interpolation.
     std::vector<unsigned int> bearingLut(metadata.nBeams);
-    for(unsigned int b = 0; b < metadata.nBeams; b++) {
+    for (unsigned int b = 0; b < metadata.nBeams; b++) {
         float bearingAngle = ((bearings.back() - bearings.front())*b) / (metadata.nBeams - 1)
                            + bearings.front();
         unsigned int idx = 0;
         float minDiff = std::abs(bearings[0] - bearingAngle);
-        for(int i = 1; i <bearings.size(); i++) {
+        for (int i = 1; i <bearings.size(); i++) {
             float diff = std::abs(bearings[i] - bearingAngle);
-            if(diff < minDiff) {
+            if (diff < minDiff) {
                 minDiff = diff;
                 idx = i;
             }
@@ -269,14 +269,14 @@ inline std::pair<unsigned int, unsigned int> image_from_ping_data(
     // and y positive is right direction.
     // In the image coordinates, x points to the top and y points to the right.
     float imageResolution = get_range(metadata) / (height - 1);
-    for(unsigned int h = 0; h < height; h++) {
+    for (unsigned int h = 0; h < height; h++) {
         // inverting x dimension to have origin at the bottom a x up.
         float x = imageResolution * (height - 1 - h);
-        for(unsigned int w = 0; w < width; w++) {
+        for (unsigned int w = 0; w < width; w++) {
             float y = imageResolution * (w - 0.5f*width);
             float range   = sqrt(x*x + y*y);
             float bearing = std::atan2(y, x);
-            if(range < 0.0f || range > get_range(metadata) || abs(bearing) > 0.5f*aperture) {
+            if (range < 0.0f || range > get_range(metadata) || abs(bearing) > 0.5f*aperture) {
                 // we are outside of the sonar fan
                 imageData[width*h + w] = 0.0f;
             }

@@ -11,7 +11,7 @@ Recorder::Recorder()
 
 Recorder::~Recorder()
 {
-    if(this->is_open()) {
+    if (this->is_open()) {
         this->close();
     }
 }
@@ -19,7 +19,7 @@ Recorder::~Recorder()
 void Recorder::open(const std::string& filename, bool force)
 {
     file_.open(filename, std::ofstream::binary);
-    if(!file_.is_open()) {
+    if (!file_.is_open()) {
         std::ostringstream oss;
         oss << "Could not open file for writing : " << filename;
         throw std::runtime_error(oss.str());
@@ -48,7 +48,7 @@ void Recorder::close()
 std::size_t Recorder::write(const blueprint::LogItem& header,
                             const uint8_t* data) const
 {
-    if(!this->is_open()) {
+    if (!this->is_open()) {
         return 0;
     }
 
@@ -59,7 +59,7 @@ std::size_t Recorder::write(const blueprint::LogItem& header,
 
 std::size_t Recorder::write(const Message& message) const
 {
-    if(!this->is_open()) {
+    if (!this->is_open()) {
         return 0;
     }
     std::size_t writtenSize = 0;
@@ -97,23 +97,23 @@ FileReader::FileReader(const std::string& filename) :
 
 FileReader::~FileReader()
 {
-    if(this->is_open()) {
+    if (this->is_open()) {
         this->close();
     }
 }
 
 bool FileReader::check_file_header(const blueprint::LogHeader& header)
 {
-    if(header.fileHeader != FileMagicNumber) {
+    if (header.fileHeader != FileMagicNumber) {
         std::ostringstream oss;
         oss << "oculus::FileReader : invalid file header, is it a .oculus file ?.\n";
         oss << "    file : '" << filename_ << "'";
         throw std::runtime_error(oss.str());
     }
-    if(header.version != 1) {
+    if (header.version != 1) {
         std::cerr << "oculus::FileHeader version is != 1. Reaingd may fail" << std::endl;
     }
-    if(header.encryption != 0) {
+    if (header.encryption != 0) {
         std::ostringstream oss;
         oss << "oculus::FileReader : file is encrypted. Cannot decode.\n";
         oss << "    file : '" << filename_ << "'";
@@ -126,14 +126,14 @@ void FileReader::open(const std::string& filename)
 {
     filename_ = filename;
     file_.open(filename, std::ifstream::binary);
-    if(!file_.is_open()) {
+    if (!file_.is_open()) {
         std::ostringstream oss;
         oss << "Could not open file for reading : " << filename;
         throw std::runtime_error(oss.str());
     }
 
     file_.read(reinterpret_cast<char*>(&fileHeader_), sizeof(fileHeader_));
-    if(!file_) {
+    if (!file_) {
         std::ostringstream oss;
         oss << "oculus::FileReader : error reading file header.\n";
         oss << "    file : '" << filename_ << "'";
@@ -153,10 +153,10 @@ void FileReader::read_next_header() const
 {
     itemPosition_ = file_.tellg();
     file_.read(reinterpret_cast<char*>(&nextItem_), sizeof(nextItem_));
-    if(!file_) {
+    if (!file_) {
         std::memset(&nextItem_, 0, sizeof(nextItem_));
         itemPosition_ = 0;
-        if(!file_.eof()) {
+        if (!file_.eof()) {
             std::ostringstream oss;
             oss << "oculus::FileReader : error reading next item header. ";
             oss << "The file may be corrupted.\n";
@@ -168,11 +168,11 @@ void FileReader::read_next_header() const
 
 std::size_t FileReader::jump_item() const
 {
-    if(nextItem_.type == 0) {
+    if (nextItem_.type == 0) {
         return 0;
     }
 
-    if(!file_.seekg(nextItem_.payloadSize, std::ios::cur)) {
+    if (!file_.seekg(nextItem_.payloadSize, std::ios::cur)) {
         std::memset(&nextItem_, 0, sizeof(nextItem_));
         std::ostringstream oss;
         oss << "oculus::FileReader : error jumping to next item. File might be corrupted.\n";
@@ -187,11 +187,11 @@ std::size_t FileReader::jump_item() const
 
 std::size_t FileReader::read_next_item(uint8_t* dst) const
 {
-    if(nextItem_.type == 0) {
+    if (nextItem_.type == 0) {
         return 0;
     }
 
-    if(!file_.read(reinterpret_cast<char*>(dst), nextItem_.payloadSize)) {
+    if (!file_.read(reinterpret_cast<char*>(dst), nextItem_.payloadSize)) {
         std::memset(&nextItem_, 0, sizeof(nextItem_));
         std::ostringstream oss;
         oss << "oculus::FileReader : error reading item data. File might be corrupted.\n";
@@ -207,7 +207,7 @@ std::size_t FileReader::read_next_item(uint8_t* dst) const
 
 std::size_t FileReader::read_next_item(std::vector<uint8_t>& dst) const
 {
-    if(nextItem_.type == 0) {
+    if (nextItem_.type == 0) {
         return 0;
     }
     dst.resize(nextItem_.payloadSize);
@@ -217,8 +217,8 @@ std::size_t FileReader::read_next_item(std::vector<uint8_t>& dst) const
 Message::ConstPtr FileReader::read_next_message() const
 {
     // Reading file until we find a rt_oculusSonar message or enf of file
-    while(nextItem_.type != blueprint::rt_oculusSonar && this->jump_item()) {}
-    if(nextItem_.type == 0) {
+    while (nextItem_.type != blueprint::rt_oculusSonar && this->jump_item()) {}
+    if (nextItem_.type == 0) {
         return nullptr;
     }
 
@@ -228,7 +228,7 @@ Message::ConstPtr FileReader::read_next_message() const
 
     // Reading TimeStamp from next message if it is there. Falling back to the
     // LogItem date if it is not there.
-    if(nextItem_.type == blueprint::rt_oculusSonarStamp) {
+    if (nextItem_.type == blueprint::rt_oculusSonarStamp) {
         // next message is timestamp associated with the message we just read.
         TimeStamp stamp;
         this->read_next_item(reinterpret_cast<uint8_t*>(&stamp));
@@ -244,10 +244,10 @@ Message::ConstPtr FileReader::read_next_message() const
 PingMessage::ConstPtr FileReader::read_next_ping() const
 {
     Message::ConstPtr msg = this->read_next_message();
-    while(msg && !msg->is_ping_message()) {
+    while (msg && !msg->is_ping_message()) {
         msg = this->read_next_message();
     }
-    if(!msg)
+    if (!msg)
         return nullptr;
     return PingMessage::Create(msg);
 }

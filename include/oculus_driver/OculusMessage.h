@@ -16,8 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *****************************************************************************/
 
-#ifndef _DEF_OCULUS_DRIVER_OCULUS_MESSAGE_H_
-#define _DEF_OCULUS_DRIVER_OCULUS_MESSAGE_H_
+#pragma once
 
 #include "oculus_driver/Oculus.h"
 #include "oculus_driver/utils.h"
@@ -104,7 +103,7 @@ class Message
     {
         OculusMessageHeader header;
         std::memcpy(&header, data, sizeof(OculusMessageHeader));
-        if(!header_valid(header) || size != header.payloadSize + sizeof(OculusMessageHeader)) { return nullptr; }
+        if (!header_valid(header) || size != header.payloadSize + sizeof(OculusMessageHeader)) { return nullptr; }
         auto res = Create();
         res->header_ = header;
         res->timestamp_ = stamp;
@@ -169,8 +168,8 @@ class PingWrapper
     PingWrapper(const Message::ConstPtr& msg)
         : msg_(msg)
     {
-        if(!msg_) { throw std::runtime_error("Trying to make a PingMessage out of empty data."); }
-        if(!msg_->is_ping_message()) { throw std::runtime_error("Trying to make a PingMessage out of non-ping data."); }
+        if (!msg_) { throw std::runtime_error("Trying to make a PingMessage out of empty data."); }
+        if (!msg_->is_ping_message()) { throw std::runtime_error("Trying to make a PingMessage out of non-ping data."); }
     }
 
   public:
@@ -235,7 +234,7 @@ class PingWrapper1 : public PingWrapper
     PingWrapper1(const Message::ConstPtr& msg)
         : PingWrapper(msg)
     {
-        if(msg->message_version() == 2)
+        if (msg->message_version() == 2)
         {
             throw std::runtime_error("Tried to initialize a PingWrapper1 with data from a PingWrapper2");
         }
@@ -295,7 +294,7 @@ class PingWrapper1 : public PingWrapper
 
     virtual uint8_t sample_size() const
     {
-        switch(this->metadata().dataSize)
+        switch (this->metadata().dataSize)
         {
         case ImageData8Bit:
             return 1;
@@ -308,11 +307,11 @@ class PingWrapper1 : public PingWrapper
         default:
             // invalid value in metadata.dataSize. Deducing from message size.
             auto lineStep = this->metadata().imageSize / this->metadata().nRanges;
-            if(lineStep * this->metadata().nRanges != this->metadata().imageSize) { return 0; }
-            if(this->has_gains()) lineStep -= 4;
+            if (lineStep * this->metadata().nRanges != this->metadata().imageSize) { return 0; }
+            if (this->has_gains()) lineStep -= 4;
             auto sampleSize = lineStep / this->metadata().nBeams;
             // Checking integrity
-            if(sampleSize * this->metadata().nBeams != lineStep) { return 0; }
+            if (sampleSize * this->metadata().nBeams != lineStep) { return 0; }
             return sampleSize;
         }
     }
@@ -388,7 +387,7 @@ class PingWrapper2 : public PingWrapper
     PingWrapper2(const Message::ConstPtr& msg)
         : PingWrapper(msg)
     {
-        if(msg->message_version() != 2)
+        if (msg->message_version() != 2)
         {
             throw std::runtime_error("Tried to initialize a PingWrapper2 with data from a PingWrapper1");
         }
@@ -449,7 +448,7 @@ class PingWrapper2 : public PingWrapper
 
     virtual uint8_t sample_size() const
     {
-        switch(this->metadata().dataSize)
+        switch (this->metadata().dataSize)
         {
         case ImageData8Bit:
             return 1;
@@ -462,11 +461,11 @@ class PingWrapper2 : public PingWrapper
         default:
             // invalid value in metadata.dataSize. Deducing from message size.
             auto lineStep = this->metadata().imageSize / this->metadata().nRanges;
-            if(lineStep * this->metadata().nRanges != this->metadata().imageSize) { return 0; }
-            if(this->has_gains()) lineStep -= 4;
+            if (lineStep * this->metadata().nRanges != this->metadata().imageSize) { return 0; }
+            if (this->has_gains()) lineStep -= 4;
             auto sampleSize = lineStep / this->metadata().nBeams;
             // Checking integrity
-            if(sampleSize * this->metadata().nBeams != lineStep) { return 0; }
+            if (sampleSize * this->metadata().nBeams != lineStep) { return 0; }
             return sampleSize;
         }
     }
@@ -543,8 +542,8 @@ class PingMessage
 
     static PingWrapper::Ptr make_ping_wrapper(const Message::ConstPtr& msg)
     {
-        if(!msg || !msg->is_ping_message()) { return nullptr; }
-        if(msg->message_version() == 2) { return PingWrapper2::Create(msg); }
+        if (!msg || !msg->is_ping_message()) { return nullptr; }
+        if (msg->message_version() == 2) { return PingWrapper2::Create(msg); }
         else { return PingWrapper1::Create(msg); }
     }
 
@@ -567,7 +566,7 @@ class PingMessage
     {
         OculusMessageHeader header;
         std::memcpy(&header, data, sizeof(OculusMessageHeader));
-        if(!is_ping_message(header) || size != header.payloadSize + sizeof(OculusMessageHeader)) { return nullptr; }
+        if (!is_ping_message(header) || size != header.payloadSize + sizeof(OculusMessageHeader)) { return nullptr; }
         return Create(Message::Create(size, data, stamp));
     }
 
@@ -708,5 +707,3 @@ class PingMessage
 };
 
 }  // namespace oculus
-
-#endif //_DEF_OCULUS_DRIVER_OCULUS_MESSAGE_H_

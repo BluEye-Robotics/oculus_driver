@@ -30,21 +30,21 @@ void print_ping(const PingMessage::ConstPtr& ping)
 {
     static unsigned int count = 0;
     cout << "=============== Got Ping : " << count++ << endl;
-    //cout << pingMetadata << endl;
+    // cout << pingMetadata << endl;
 }
 
 void print_dummy(const OculusMessageHeader& msg)
 {
     static unsigned int count = 0;
     cout << "=============== Got dummy : " << count++ << endl;
-    //cout << msg << endl;
+    // cout << msg << endl;
 }
 
 int main()
 {
     auto ioService = std::make_shared<SonarDriver::IoService>();
     SonarDriver driver(ioService, spdlog::get("console"));
-    
+
     driver.ping_callbacks().append(&print_ping);
     driver.dummy_callbacks().append(&print_dummy);
 

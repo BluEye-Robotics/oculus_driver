@@ -42,7 +42,7 @@ void print_dummy(const OculusMessageHeader& msg)
 
 void print_all(const Message::ConstPtr& msg)
 {
-    switch(msg->header().msgId)
+    switch (msg->header().msgId)
     {
     case OculusMessageType::MsgSimplePingResult:
         std::cout << "Got messageSimplePingResult" << endl;
@@ -71,7 +71,7 @@ int main()
     SonarDriver sonar(ioService.io_service(), spdlog::get("console"));
 
     // sonar.add_ping_callback(&print_ping);
-    // sonar.add_dummy_callback(&print_dummy);  
+    // sonar.add_dummy_callback(&print_dummy);
     sonar.message_callbacks().append(&print_all);
 
     ioService.start();
@@ -86,8 +86,8 @@ int main()
     auto config = default_ping_config();
     config.pingRate = PingRateType::PingRateStandby;
     sonar.send_ping_config(config);
-    sonar.dummy_callbacks().append([](const OculusMessageHeader& header) { 
-        std::cout << "Got awaited dummy !" << std::endl; 
+    sonar.dummy_callbacks().append([](const OculusMessageHeader& header) {
+        std::cout << "Got awaited dummy !" << std::endl;
     });
     std::cout << "After awaited dummy" << std::endl;
 

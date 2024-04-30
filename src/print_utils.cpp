@@ -52,7 +52,7 @@ std::string to_string(DataSizeType dataType)
 
 std::string to_string(PingRateType pingRate)
 {
-    switch(pingRate)
+    switch (pingRate)
     {
     case PingRateNormal:
         return "normal (10Hz)";
@@ -168,7 +168,7 @@ std::string to_string(const OculusSimpleFireMessage2& msg, const std::string& pr
     // Reserved values have multiple fields. Don't need to show them.
     // << prefix
     // << "reserved        :";
-    // for(unsigned int i = 0; i < 8; i++)
+    // for (unsigned int i = 0; i < 8; i++)
     // {
     //     oss << " " << msg.reserved[i];
     // }

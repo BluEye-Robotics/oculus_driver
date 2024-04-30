@@ -33,11 +33,11 @@ StatusListener::StatusListener(const IoServicePtr &service,
     socket_.open(boost::asio::ip::udp::v4(), err);
 
     // socket_.set_option(boost::asio::socket_base::broadcast(true));
-    if(err)
+    if (err)
         throw std::runtime_error("Error opening socket");
 
     socket_.bind(remote_);
-    if(err)
+    if (err)
         throw std::runtime_error("Socket remote error");
 
     logger->info("listening to remote : {}", remote_.address().to_string());
@@ -56,13 +56,13 @@ void StatusListener::get_one_message()
 void StatusListener::message_callback(const boost::system::error_code& err,
                                       std::size_t bytesReceived)
 {
-    if(err) {
+    if (err) {
         logger->error("message_callback: Status reception error.");
         this->get_one_message();
         return;
     }
 
-    if(bytesReceived != sizeof(OculusStatusMsg)) {
+    if (bytesReceived != sizeof(OculusStatusMsg)) {
         logger->error("message_callback: not enough bytes.");
         this->get_one_message();
         return;

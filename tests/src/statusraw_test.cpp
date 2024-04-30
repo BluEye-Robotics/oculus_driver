@@ -46,13 +46,13 @@ struct CallbackTest
     {
         cout << "callback2" << endl;
     }
-    
+
     // name of function must be unique (otherwise fails at overload resolution)
     void callback3(int value, const OculusStatusMsg& msg)
     {
         cout << "callback3, value : " << value << endl;
     }
-    
+
     // cannot bind this one. msg must be the last parameter
     void callback4(const OculusStatusMsg& msg, int value)
     {
@@ -75,8 +75,8 @@ int main()
     listener.callbacks().append(std::bind(&CallbackTest::callback4, &test0, _1, 16));
 
     // this fail at compile time
-    //listener.callbacks().append(&CallbackTest::callback4, &test0, 14);
-    
+    // listener.callbacks().append(&CallbackTest::callback4, &test0, 14);
+
     ioService->run();  // is blocking
 
     return 0;

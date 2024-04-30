@@ -46,7 +46,7 @@ bool SonarDriver::send_ping_config(PingConfig config)
     buf.sputn(reinterpret_cast<const char*>(&config), sizeof(config));
 
     auto bytesSent = this->send(buf);
-    if(bytesSent != sizeof(config))
+    if (bytesSent != sizeof(config))
     {
         logger->error("Could not send whole fire message({}/{})",
             bytesSent, sizeof(config));
@@ -62,7 +62,7 @@ bool SonarDriver::send_ping_config(PingConfig config)
 
     // Also saving the last pingRate which is not standby to be able to resume
     // the sonar to the last ping rate in the resume() method.
-    if(lastConfig_.pingRate != PingRateStandby) {
+    if (lastConfig_.pingRate != PingRateStandby) {
       lastPingRate_ = lastConfig_.pingRate;
     }
     return true;
@@ -85,7 +85,7 @@ SonarDriver::PingConfig SonarDriver::current_ping_config()
         config.head = message->header();
     };
 
-    if(!timedCallback(messageCallbacks_, configSetter))
+    if (!timedCallback(messageCallbacks_, configSetter))
     {
         throw TimeoutReached();
     }
@@ -103,12 +103,12 @@ SonarDriver::PingConfig SonarDriver::request_ping_config(PingConfig request)
     const int maxCount = 100;  // TODO: make a parameter out of this
     do
     {
-        if(this->send_ping_config(request))
+        if (this->send_ping_config(request))
         {
             try
             {
                 feedback = this->current_ping_config();
-                if(check_config_feedback(request, feedback)) break;
+                if (check_config_feedback(request, feedback)) break;
             }
             catch(const TimeoutReached& e)
             {
@@ -117,9 +117,9 @@ SonarDriver::PingConfig SonarDriver::request_ping_config(PingConfig request)
             }
         }
         count++;
-    } while(count < maxCount);
+    } while (count < maxCount);
 
-    if(count >= maxCount)
+    if (count >= maxCount)
     {
         logger->error(
             "Could not get a proper feedback from the sonar. "
@@ -169,7 +169,7 @@ void SonarDriver::handle_message(const Message::ConstPtr& message)
     const auto& header = message->header();
     const auto& data = message->data();
     auto newConfig = lastConfig_;
-    switch(header.msgId)
+    switch (header.msgId)
     {
     case MsgSimplePingResult:
         newConfig = reinterpret_cast<const PingResult*>(data.data())->fireMessage;
@@ -181,7 +181,7 @@ void SonarDriver::handle_message(const Message::ConstPtr& message)
         // fireMessage in the ping results will be 40%). The gain is
         // rescaled here to ensure consistent parameter handling on client
         // side).
-        if(newConfig.masterMode == 2) {
+        if (newConfig.masterMode == 2) {
             newConfig.gain = (newConfig.gain - 40.0) * 100.0 / 60.0;
         }
         break;
@@ -193,7 +193,7 @@ void SonarDriver::handle_message(const Message::ConstPtr& message)
         break;
     };
 
-    if(config_changed(lastConfig_, newConfig)) {
+    if (config_changed(lastConfig_, newConfig)) {
         configCallbacks_(lastConfig_, newConfig);
     }
     lastConfig_ = newConfig;
@@ -201,7 +201,7 @@ void SonarDriver::handle_message(const Message::ConstPtr& message)
     // Calling generic message callbacks first (in case we want to do something
     // before calling the specialized callbacks).
     messageCallbacks_(message);
-    switch(header.msgId)
+    switch (header.msgId)
     {
     case MsgSimplePingResult:
         pingCallbacks_(PingMessage::Create(message));

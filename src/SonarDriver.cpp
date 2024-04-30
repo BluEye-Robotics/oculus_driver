@@ -25,6 +25,7 @@ SonarDriver::SonarDriver(const IoServicePtr &service,
                          const std::shared_ptr<spdlog::logger> &logger,
                          const Duration &checkerPeriod)
     : SonarClient(service, logger, checkerPeriod),
+      logger(logger->clone("oculus::SonarDriver")),
       lastConfig_(default_ping_config()),
       lastPingRate_(PingRateNormal) {}
 

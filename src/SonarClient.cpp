@@ -29,7 +29,7 @@ SonarClient::SonarClient(const IoServicePtr &service,
                          const std::shared_ptr<spdlog::logger> &logger,
                          const Duration &checkerPeriod)
     : ioService_(service),
-      logger(logger),
+      logger(logger->clone("oculus::SonarClient")),
       socket_(nullptr),
       remote_(),
       sonarId_(0),

@@ -44,6 +44,9 @@ class SonarDriver : public SonarClient
     using TimeSource = SonarClient::TimeSource;
     using TimePoint  = typename std::invoke_result<decltype(&TimeSource::now)>::type;
 
+    private:
+    std::shared_ptr<spdlog::logger> logger;
+
     protected:
     PingConfig lastConfig_;
     uint8_t    lastPingRate_;

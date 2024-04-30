@@ -25,7 +25,7 @@ using namespace std::placeholders;
 StatusListener::StatusListener(const IoServicePtr &service,
                                const std::shared_ptr<spdlog::logger> &logger,
                                uint16_t listeningPort)
-    : logger(logger),
+    : logger(logger->clone("oculus::StatusListener")),
       socket_(*service),
       remote_(boost::asio::ip::address_v4::any(), listeningPort)
 {
@@ -34,13 +34,13 @@ StatusListener::StatusListener(const IoServicePtr &service,
 
     // socket_.set_option(boost::asio::socket_base::broadcast(true));
     if(err)
-        throw std::runtime_error("oculus::StatusListener : Error opening socket");
+        throw std::runtime_error("Error opening socket");
 
     socket_.bind(remote_);
     if(err)
-        throw std::runtime_error("oculus::StatusListener : Socket remote error");
+        throw std::runtime_error("Socket remote error");
 
-    logger->info("oculus::StatusListener : listening to remote : {}", remote_.address().to_string());
+    logger->info("listening to remote : {}", remote_.address().to_string());
     this->get_one_message();
 }
 

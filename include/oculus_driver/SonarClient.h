@@ -71,11 +71,12 @@ class SonarClient
     using TimeSource = Message::TimeSource;
     using TimePoint  = Message::TimePoint;
 
+    private:
+    const std::shared_ptr<spdlog::logger> logger;
+
     protected:
-    
     IoServicePtr       ioService_;
 
-    const std::shared_ptr<spdlog::logger>   logger;
 
     SocketPtr          socket_;
     EndPoint           remote_;

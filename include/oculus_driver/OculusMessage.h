@@ -334,7 +334,7 @@ class PingWrapper1 : public PingWrapper
 
     virtual double gain_percent() const
     {
-        return this->metadata().fireMessage.gainPercent;
+        return this->metadata().fireMessage.gain;
     }
 
     virtual double frequency() const
@@ -488,7 +488,7 @@ class PingWrapper2 : public PingWrapper
 
     virtual double gain_percent() const
     {
-        return this->metadata().fireMessage.gainPercent;
+        return this->metadata().fireMessage.gain;
     }
 
     virtual double frequency() const

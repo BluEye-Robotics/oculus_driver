@@ -20,10 +20,13 @@
 #include <sstream>
 using namespace std;
 
-#include <oculus_driver/Oculus.h>
-#include <oculus_driver/print_utils.h>
-#include <oculus_driver/StatusListener.h>
+#include <spdlog/spdlog.h>
+
+#include "oculus_driver/Oculus.h"
+#include "oculus_driver/print_utils.h"
+#include "oculus_driver/StatusListener.h"
 using namespace oculus;
+
 
 void print_callback(const OculusStatusMsg& msg)
 {
@@ -33,13 +36,11 @@ void print_callback(const OculusStatusMsg& msg)
 int main()
 {
     auto ioService = std::make_shared<StatusListener::IoService>();
-    StatusListener listener(ioService);
+    StatusListener listener(ioService, spdlog::get("console"));
 
-    listener.add_callback(&print_callback);
+    listener.callbacks().append(&print_callback);
     
     ioService->run(); // is blocking
 
     return 0;
 }
-
-

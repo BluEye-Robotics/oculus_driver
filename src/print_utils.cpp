@@ -100,7 +100,7 @@ std::string to_string(const OculusSimpleFireMessage& msg, const std::string& pre
     oss << prefix << "masterMode      : " << (int)msg.masterMode << prefix << "pingRate        : " << (int)msg.pingRate << prefix
         << "networkSpeed    : " << (int)msg.networkSpeed << prefix << "gammaCorrection : " << (int)msg.gammaCorrection << prefix
         << "flags           : " << std::hex << (int)msg.flags << prefix << "range           : " << msg.range << prefix
-        << "gainPercent     : " << msg.gainPercent << prefix << "speedOfSound    : " << msg.speedOfSound << prefix
+        << "gain     : " << msg.gain << prefix << "speedOfSound    : " << msg.speedOfSound << prefix
         << "salinity        : " << msg.salinity;
     return oss.str();
 }
@@ -123,8 +123,8 @@ std::string to_string(const OculusSimpleFireMessage2& msg, const std::string& pr
     std::ostringstream oss;
     oss << prefix << "masterMode      : " << (int)msg.masterMode << prefix << "pingRate        : " << (int)msg.pingRate << prefix
         << "networkSpeed    : " << (int)msg.networkSpeed << prefix << "gammaCorrection : " << (int)msg.gammaCorrection << prefix
-        << "flags           : " << std::hex << (int)msg.flags << prefix << "rangePercent    : " << msg.range << prefix
-        << "gainPercent     : " << msg.gainPercent << prefix << "speedOfSound    : " << msg.speedOfSound << prefix
+        << "flags           : " << std::hex << (int)msg.flags << prefix << "range    : " << msg.range << prefix
+        << "gain     : " << msg.gain << prefix << "speedOfSound    : " << msg.speedOfSound << prefix
         << "salinity        : " << msg.salinity << prefix << "extFlags        : " << std::hex << msg.extFlags;
     // Reserved values have multiple fields. Don't need to show them.
     // << prefix

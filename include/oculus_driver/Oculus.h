@@ -162,7 +162,7 @@ typedef struct
                    // bit 6: [FullBeams]      1: Use 512 beams. 0: Use 256 beams.
                    // bit 7: [NetworkTrigger] 1: Only fires when instructed. 0: Fires automatically according to PingRate.
     double range; // The range demand in percent or m depending on flags
-    double gainPercent; // The gain demand
+    double gain; // The gain demand
     double speedOfSound; // ms-1, if set to zero then internal calc will apply using salinity
     double salinity; // ppt, set to zero if we are in fresh water
 } OculusSimpleFireMessage;
@@ -176,7 +176,7 @@ typedef struct
     uint8_t gammaCorrection; // The gamma correction - 255 is equal to a gamma correction of 1.0
     uint8_t flags;
     double range; // The range demand (%)
-    double gainPercent; // The percentage gain
+    double gain; // The percentage gain
     double speedOfSound; // The speed of sound - set to zero to use internal calculations
     double salinity; // THe salinity to be used with internal speed of sound calculations (ppt)
     uint32_t extFlags;

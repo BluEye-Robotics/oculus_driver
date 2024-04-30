@@ -20,8 +20,11 @@
 #include <sstream>
 using namespace std;
 
-#include <oculus_driver/SonarDriver.h>
+#include <spdlog/spdlog.h>
+
+#include "oculus_driver/SonarDriver.h"
 using namespace oculus;
+
 
 void print_ping(const PingMessage::ConstPtr& ping)
 {
@@ -40,7 +43,7 @@ void print_dummy(const OculusMessageHeader& msg)
 int main()
 {
     auto ioService = std::make_shared<SonarDriver::IoService>();
-    SonarDriver driver(ioService);
+    SonarDriver driver(ioService, spdlog::get("console"));
     
     driver.ping_callbacks().append(&print_ping);
     driver.dummy_callbacks().append(&print_dummy);

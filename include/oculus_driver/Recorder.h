@@ -1,12 +1,11 @@
-#ifndef _DEF_OCULUS_DRIVER_RECORDER_H_
-#define _DEF_OCULUS_DRIVER_RECORDER_H_
+#pragma once
 
 #include <fstream>
 #include <memory>
 #include <chrono>
 #include <sstream>
 
-#include <oculus_driver/OculusMessage.h>
+#include "oculus_driver/OculusMessage.h"
 
 namespace oculus {
 
@@ -199,7 +198,3 @@ class FileReader
 };
 
 } // namespace oculus
-
-#endif //_DEF_OCULUS_DRIVER_RECORDER_H_
-
-

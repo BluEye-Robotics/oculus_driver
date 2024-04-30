@@ -1,7 +1,8 @@
-#include <oculus_driver/Recorder.h>
-#include <oculus_driver/print_utils.h>
+#include "oculus_driver/Recorder.h"
 
 #include <iostream>
+
+#include "oculus_driver/print_utils.h"
 
 namespace oculus {
 
@@ -253,4 +254,3 @@ PingMessage::ConstPtr FileReader::read_next_ping() const
 }
 
 } //namespace oculus
-

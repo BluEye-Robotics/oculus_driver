@@ -96,7 +96,7 @@ inline bool has_16bits_data(const OculusSimplePingResult2& msg)
 }
 inline double get_range(const OculusSimpleFireMessage2& msg)
 {
-    return msg.rangePercent;
+    return msg.range;
 }
 inline double get_range(const OculusSimplePingResult2& msg)
 {
@@ -165,7 +165,7 @@ inline void ping_data_to_array(T* dst,
 inline std::vector<float> get_ping_acoustic_data(const std::vector<uint8_t>& pingData)
 {
     auto header = *reinterpret_cast<const OculusMessageHeader*>(pingData.data());
-    if(header.msgId != messageSimplePingResult) {
+    if(header.msgId != MsgSimplePingResult) {
         throw std::runtime_error("Not a ping result");
     }
     if(header.msgVersion != 2) {
@@ -199,7 +199,7 @@ inline void get_ping_bearings(T* dst,
 inline std::vector<float> get_ping_bearings(const std::vector<uint8_t>& pingData)
 {
     auto header = *reinterpret_cast<const OculusMessageHeader*>(pingData.data());
-    if(header.msgId != messageSimplePingResult) {
+    if(header.msgId != MsgSimplePingResult) {
         throw std::runtime_error("Not a ping result");
     }
     if(header.msgVersion != 2) {

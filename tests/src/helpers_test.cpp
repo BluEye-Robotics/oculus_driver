@@ -1,15 +1,17 @@
 #include <iostream>
 using namespace std;
 
-#include <oculus_driver/Recorder.h>
-#include <oculus_driver/helpers.h>
-#include <oculus_driver/print_utils.h>
+#include <spdlog/spdlog.h>
+
+#include "oculus_driver/Recorder.h"
+#include "oculus_driver/helpers.h"
+#include "oculus_driver/print_utils.h"
 using namespace oculus;
 
 void handle_oculus_message(const std::vector<uint8_t>& data)
 {
     auto header = *reinterpret_cast<const OculusMessageHeader*>(data.data());
-    if(header.msgId != messageSimplePingResult) {
+    if(header.msgId != MsgSimplePingResult) {
         cout << "Got non-ping message" << endl;
     }
     else {
@@ -77,5 +79,3 @@ int main(int argc, char** argv)
 
     return 0;
 }
-
-

@@ -16,12 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *****************************************************************************/
 
+#include <iostream>
+#include <sstream>
+
+#include <spdlog/spdlog.h>
+
 #include "oculus_driver/AsyncService.h"
 #include "oculus_driver/SonarDriver.h"
 
-#include <iostream>
-#include <sstream>
-#include <spdlog/spdlog.h>
 
 using namespace std;
 using namespace oculus;

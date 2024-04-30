@@ -70,7 +70,7 @@ inline OculusSimpleFireMessage2 default_ping_config()
     msg.gammaCorrection = 127;
     msg.pingRate = PingRateType::PingRateNormal;
     msg.range = 2.54;
-    msg.gainPercent = 50;
+    msg.gain = 50;
     msg.flags = 0b00011101;
     // bit 0: [RangeInMetres]  1: Metres.
     // bit 1: [16BitImg]       0: 8-bit.
@@ -102,7 +102,7 @@ inline bool check_config_feedback(const OculusSimpleFireMessage2& requested, con
            // feedback is broken on pingRate field
            //&& requested.pingRate         == feedback.pingRate
            && requested.gammaCorrection == feedback.gammaCorrection && requested.flags == feedback.flags &&
-           requested.range == feedback.range && std::abs(requested.gainPercent - feedback.gainPercent) < 1.0e-1)
+           requested.range == feedback.range && std::abs(requested.gain - feedback.gain) < 1.0e-1)
         {
             // return true; // bypassing checks on sound speed
             //  changing soundspeed is very slow (up to 6 seconds, maybe more)
@@ -133,7 +133,7 @@ inline bool config_changed(const OculusSimpleFireMessage2& previous, const Oculu
     if(previous.flags != next.flags) return true;
 
     if(abs(previous.range - next.range) > 0.001) return true;
-    if(abs(previous.gainPercent - next.gainPercent) > 0.1) return true;
+    if(abs(previous.gain - next.gain) > 0.1) return true;
     if(abs(previous.speedOfSound - next.speedOfSound) > 0.1) return true;
     if(abs(previous.salinity - next.salinity) > 0.1) return true;
 

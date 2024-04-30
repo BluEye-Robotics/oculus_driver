@@ -21,9 +21,12 @@
 #include <thread>
 using namespace std;
 
-#include <oculus_driver/AsyncService.h>
-#include <oculus_driver/SonarDriver.h>
+#include <spdlog/spdlog.h>
+
+#include "oculus_driver/AsyncService.h"
+#include "oculus_driver/SonarDriver.h"
 using namespace oculus;
+
 
 void print_ping(const PingMessage::ConstPtr& ping)
 {
@@ -43,7 +46,7 @@ int main()
 {
     //Sonar sonar;
     AsyncService ioService;
-    SonarDriver sonar(ioService.io_service());
+    SonarDriver sonar(ioService.io_service(), spdlog::get("console"));
     
     sonar.ping_callbacks().append(&print_ping);
     sonar.dummy_callbacks().append(&print_dummy);

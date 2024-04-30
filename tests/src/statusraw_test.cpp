@@ -22,10 +22,13 @@
 using namespace std;
 using namespace std::placeholders;
 
-#include <oculus_driver/Oculus.h>
-#include <oculus_driver/print_utils.h>
-#include <oculus_driver/StatusListener.h>
+#include <spdlog/spdlog.h>
+
+#include "oculus_driver/Oculus.h"
+#include "oculus_driver/print_utils.h"
+#include "oculus_driver/StatusListener.h"
 using namespace oculus;
+
 
 void print_callback(const OculusStatusMsg& msg)
 {
@@ -60,23 +63,21 @@ struct CallbackTest
 int main()
 {
     auto ioService = std::make_shared<StatusListener::IoService>();
-    StatusListener listener(ioService);
+    StatusListener listener(ioService, spdlog::get("console"));
 
-    listener.add_callback(&print_callback);
+    listener.callbacks().append(&print_callback);
 
-    listener.add_callback(&callback1);
+    listener.callbacks().append(&callback1);
 
     CallbackTest test0;
-    listener.add_callback(std::bind(&CallbackTest::callback2, &test0, _1));
-    listener.add_callback(std::bind(&CallbackTest::callback3, &test0, 14, _1));
-    listener.add_callback(std::bind(&CallbackTest::callback4, &test0, _1, 16));
+    listener.callbacks().append(std::bind(&CallbackTest::callback2, &test0, _1));
+    listener.callbacks().append(std::bind(&CallbackTest::callback3, &test0, 14, _1));
+    listener.callbacks().append(std::bind(&CallbackTest::callback4, &test0, _1, 16));
 
     // this fail at compile time
-    //listener.add_callback(&CallbackTest::callback4, &test0, 14);
+    //listener.callbacks().append(&CallbackTest::callback4, &test0, 14);
     
     ioService->run(); // is blocking
 
     return 0;
 }
-
-

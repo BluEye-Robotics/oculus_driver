@@ -80,7 +80,8 @@ void SonarClient::checker_callback(const boost::system::error_code& err)
 
     // Programming now the next check
     this->checkerTimer_.expires_from_now(checkerPeriod_);
-    this->checkerTimer_.async_wait(std::bind(&SonarClient::checker_callback, this, std::placeholders::_1));
+    this->checkerTimer_.async_wait(
+        std::bind(&SonarClient::checker_callback, this, std::placeholders::_1));
 
     if(connectionState_ == Initializing || connectionState_ == Attempt)
     {
@@ -229,11 +230,14 @@ void SonarClient::initiate_receive()
     logger->trace("Initiate receive: {}", count++);
     boost::asio::async_read(
         *socket_,
-        boost::asio::buffer(reinterpret_cast<uint8_t*>(&message_->header_), sizeof(message_->header_)),
+        boost::asio::buffer(
+            reinterpret_cast<uint8_t*>(&message_->header_),
+            sizeof(message_->header_)),
         std::bind(&SonarClient::header_received_callback, this, _1, _2));
 }
 
-void SonarClient::header_received_callback(const boost::system::error_code err, std::size_t receivedByteCount)
+void SonarClient::header_received_callback(const boost::system::error_code err,
+                                           std::size_t receivedByteCount)
 {
     static unsigned int count = 0;
     logger->trace("Header received callback: {}", count);
@@ -241,8 +245,8 @@ void SonarClient::header_received_callback(const boost::system::error_code err, 
     // the header is valid, the control is dispatched to the next state
     // depending on the header content (message type). For now only simple ping
     // is implemented, but it seems to be the only message sent by the Oculus.
-    // (TODO : check this last statement. Checked : wrong. Other message types
-    // seem to be sent but are not documented by Oculus).
+    // TODO : check this last statement. Checked : wrong.
+    // Other message types seem to be sent but are not documented by Oculus).
     this->check_reception(err);
     if(receivedByteCount != sizeof(message_->header_) || !this->is_valid(message_->header_))
     {
@@ -268,7 +272,8 @@ void SonarClient::header_received_callback(const boost::system::error_code err, 
     }
 }
 
-void SonarClient::data_received_callback(const boost::system::error_code err, std::size_t receivedByteCount)
+void SonarClient::data_received_callback(const boost::system::error_code err,
+                                         std::size_t receivedByteCount)
 {
     logger->trace("Data received callback");
     if(receivedByteCount != message_->header_.payloadSize)

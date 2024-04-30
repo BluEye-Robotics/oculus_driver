@@ -26,16 +26,22 @@ namespace oculus
 std::string ip_to_string(uint32_t ip)
 {
     std::ostringstream oss;
-    oss << (ip & 0x000000ff) << "." << ((ip & 0x0000ff00) >> 8) << "." << ((ip & 0x00ff0000) >> 16) << "."
-        << ((ip & 0xff000000) >> 24);
+    oss << (ip & 0x000000ff)
+        << "." << ((ip & 0x0000ff00) >> 8)
+        << "." << ((ip & 0x00ff0000) >> 16)
+        << "." << ((ip & 0xff000000) >> 24);
     return oss.str();
 }
 
 std::string mac_to_string(const uint8_t* mac)
 {
     std::ostringstream oss;
-    oss << std::hex << (unsigned int)mac[0] << ":" << (unsigned int)mac[1] << ":" << (unsigned int)mac[2] << ":"
-        << (unsigned int)mac[3] << ":" << (unsigned int)mac[4] << ":" << (unsigned int)mac[5];
+    oss << std::hex << (unsigned int)mac[0]
+        << ":" << (unsigned int)mac[1]
+        << ":" << (unsigned int)mac[2]
+        << ":" << (unsigned int)mac[3]
+        << ":" << (unsigned int)mac[4]
+        << ":" << (unsigned int)mac[5];
     return oss.str();
 }
 
@@ -107,7 +113,8 @@ std::string to_string(const OculusStatusMsg& msg, const std::string& prefix)
     return oss.str();
 }
 
-std::string to_string(const OculusSimpleFireMessage& msg, const std::string& prefix)
+std::string to_string(const OculusSimpleFireMessage& msg,
+                      const std::string& prefix)
 {
     std::ostringstream oss;
     oss << prefix

@@ -46,21 +46,24 @@ StatusListener::StatusListener(const IoServicePtr &service,
 
 void StatusListener::get_one_message()
 {
-    socket_.async_receive(boost::asio::buffer(static_cast<void*>(&msg_), sizeof(msg_)),
-                          std::bind(&StatusListener::message_callback, this, _1, _2));
+    socket_.async_receive(
+        boost::asio::buffer(
+            static_cast<void*>(&msg_),
+            sizeof(msg_)),
+        std::bind(&StatusListener::message_callback, this, _1, _2));
 }
 
 void StatusListener::message_callback(const boost::system::error_code& err,
                                       std::size_t bytesReceived)
 {
     if(err) {
-        logger->error("oculus::StatusListener::message_callback: Status reception error.");
+        logger->error("message_callback: Status reception error.");
         this->get_one_message();
         return;
     }
 
     if(bytesReceived != sizeof(OculusStatusMsg)) {
-        logger->error("oculus::StatusListener::message_callback: not enough bytes.");
+        logger->error("message_callback: not enough bytes.");
         this->get_one_message();
         return;
     }

@@ -38,7 +38,8 @@ bool SonarDriver::send_ping_config(PingConfig config)
     config.head.payloadSize = sizeof(PingConfig) - sizeof(OculusMessageHeader);
     config.head.msgVersion = 2;  // Requesting SimpleFireResponse V2
 
-    // Other non runtime-configurable parameters (TODO : make then launch parameters)
+    // Other non runtime-configurable parameters
+    // TODO: make them launch parameters
     config.networkSpeed = 0xff;
 
     boost::asio::streambuf buf;
@@ -47,7 +48,8 @@ bool SonarDriver::send_ping_config(PingConfig config)
     auto bytesSent = this->send(buf);
     if(bytesSent != sizeof(config))
     {
-        logger->error("Could not send whole fire message({}/{})", bytesSent, sizeof(config));
+        logger->error("Could not send whole fire message({}/{})",
+            bytesSent, sizeof(config));
         return false;
     }
 
@@ -94,10 +96,11 @@ SonarDriver::PingConfig SonarDriver::request_ping_config(PingConfig request)
 {
     request.flags |= 0x4;  // forcing sonar sending gains to true
 
-    // Waiting for a ping or a dummy message to have a feedback on the config changes.
+    // Waiting for a ping or a dummy message to have a feedback on
+    // the config changes.
     PingConfig feedback;
     int count = 0;
-    const int maxCount = 100;  // TODO(jp-pino) make a parameter out of this
+    const int maxCount = 100;  // TODO: make a parameter out of this
     do
     {
         if(this->send_ping_config(request))
@@ -170,14 +173,17 @@ void SonarDriver::handle_message(const Message::ConstPtr& message)
     {
     case MsgSimplePingResult:
         newConfig = reinterpret_cast<const PingResult*>(data.data())->fireMessage;
-        newConfig.pingRate = lastConfig_.pingRate;  // feedback is broken on pingRate
+        // feedback is broken on pingRate
+        newConfig.pingRate = lastConfig_.pingRate;
         // When masterMode = 2, the sonar force gain between 40& and
         // 100%, BUT still needs resquested gain to be between 0%
         // and 100%. (If you request a gain=0 in masterMode=2, the
         // fireMessage in the ping results will be 40%). The gain is
         // rescaled here to ensure consistent parameter handling on client
         // side).
-        if(newConfig.masterMode == 2) { newConfig.gain = (newConfig.gain - 40.0) * 100.0 / 60.0; }
+        if(newConfig.masterMode == 2) {
+            newConfig.gain = (newConfig.gain - 40.0) * 100.0 / 60.0;
+        }
         break;
     case MsgDummy:
         logger->trace("Dummy message received. Changing ping rate to standby");

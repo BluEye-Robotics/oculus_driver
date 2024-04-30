@@ -1,0 +1,19 @@
+name: test-clang-format
+
+on: [push]
+
+jobs:
+  check-clang-format:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: DoozyX/clang-format-lint-action@v0.16.2
+      with:
+        source: '.'
+        extensions: 'h,cpp,hpp'
+        clangFormatVersion: 16
+        inplace: True
+        style: file
+    - name: Check if files were changed
+      run: bash -c "! git diff| grep diff"

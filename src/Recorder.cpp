@@ -36,7 +36,7 @@ void Recorder::open(const std::string& filename, bool force)
     header.encryption = 0;
     header.time = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count() / 1000.0;
-    
+
     file_.write((const char*)&header, sizeof(header));
 }
 
@@ -68,7 +68,7 @@ std::size_t Recorder::write(const Message& message) const
 
     blueprint::LogItem item;
     std::memset(&item, 0, sizeof(item));
-    
+
     item.itemHeader   = ItemMagicNumber;
     item.sizeHeader   = sizeof(item);
     item.type         = blueprint::rt_oculusSonar;
@@ -132,7 +132,7 @@ void FileReader::open(const std::string& filename)
         throw std::runtime_error(oss.str());
     }
 
-    file_.read((char*)&fileHeader_, sizeof(fileHeader_));
+    file_.read(reinterpret_cast<char*>(&fileHeader_), sizeof(fileHeader_));
     if(!file_) {
         std::ostringstream oss;
         oss << "oculus::FileReader : error reading file header.\n";
@@ -152,7 +152,7 @@ void FileReader::rewind()
 void FileReader::read_next_header() const
 {
     itemPosition_ = file_.tellg();
-    file_.read((char*)&nextItem_, sizeof(nextItem_));
+    file_.read(reinterpret_cast<char*>(&nextItem_), sizeof(nextItem_));
     if(!file_) {
         std::memset(&nextItem_, 0, sizeof(nextItem_));
         itemPosition_ = 0;
@@ -191,7 +191,7 @@ std::size_t FileReader::read_next_item(uint8_t* dst) const
         return 0;
     }
 
-    if(!file_.read((char*)dst, nextItem_.payloadSize)) {
+    if(!file_.read(reinterpret_cast<char*>(dst), nextItem_.payloadSize)) {
         std::memset(&nextItem_, 0, sizeof(nextItem_));
         std::ostringstream oss;
         oss << "oculus::FileReader : error reading item data. File might be corrupted.\n";
@@ -217,7 +217,7 @@ std::size_t FileReader::read_next_item(std::vector<uint8_t>& dst) const
 Message::ConstPtr FileReader::read_next_message() const
 {
     // Reading file until we find a rt_oculusSonar message or enf of file
-    while(nextItem_.type != blueprint::rt_oculusSonar && this->jump_item());
+    while(nextItem_.type != blueprint::rt_oculusSonar && this->jump_item()) {}
     if(nextItem_.type == 0) {
         return nullptr;
     }
@@ -231,10 +231,9 @@ Message::ConstPtr FileReader::read_next_message() const
     if(nextItem_.type == blueprint::rt_oculusSonarStamp) {
         // next message is timestamp associated with the message we just read.
         TimeStamp stamp;
-        this->read_next_item((uint8_t*)&stamp);
+        this->read_next_item(reinterpret_cast<uint8_t*>(&stamp));
         message_->timestamp_ = stamp.to_sonar_stamp();
-    }
-    else {
+    } else {
         uint64_t nanos = 1000000000*nextItemDate;
         message_->timestamp_ = Message::TimePoint(std::chrono::nanoseconds(nanos));
     }
@@ -253,4 +252,4 @@ PingMessage::ConstPtr FileReader::read_next_ping() const
     return PingMessage::Create(msg);
 }
 
-} //namespace oculus
+}  // namespace oculus

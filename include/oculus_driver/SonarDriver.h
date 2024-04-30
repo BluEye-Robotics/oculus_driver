@@ -83,4 +83,4 @@ class SonarDriver : public SonarClient
     auto& config_callbacks() { return configCallbacks_; }
 };
 
-} //namespace oculus
+}  // namespace oculus

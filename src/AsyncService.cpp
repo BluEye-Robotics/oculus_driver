@@ -62,7 +62,7 @@ void AsyncService::stop()
     if(!this->is_running()) return;
 
     std::cout << "stopping" << std::endl;
-    
+
     service_->stop();
     thread_.join();
     if(thread_.joinable())
@@ -73,4 +73,4 @@ void AsyncService::stop()
     std::cout << "stopped" << std::endl;
 }
 
-} //namespace oculus
+}  // namespace oculus

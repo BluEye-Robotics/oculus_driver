@@ -51,7 +51,7 @@ bool SonarClient::connected() const
 
 size_t SonarClient::send(const boost::asio::streambuf& buffer) const
 {
-    std::unique_lock<std::mutex> lock(socketMutex_); // auto lock
+    std::unique_lock<std::mutex> lock(socketMutex_);  // auto lock
 
     if(!socket_ || !this->connected()) return 0;
     return socket_->send(buffer.data());
@@ -66,13 +66,13 @@ size_t SonarClient::send(const boost::asio::streambuf& buffer) const
  */
 void SonarClient::checker_callback(const boost::system::error_code& err)
 {
-    if(err) 
+    if(err)
     {
         logger->error("Checker error: {}", err.message());
         return;
     }
 
-    if(checkerTimer_.expires_at() == boost::posix_time::neg_infin) 
+    if(checkerTimer_.expires_at() == boost::posix_time::neg_infin)
     {
         logger->error("Checker timer cancelled");
         return;
@@ -124,11 +124,11 @@ void SonarClient::check_reception(const boost::system::error_code& err)
 void SonarClient::reset_connection()
 {
     logger->info("Resetting connection");
-    
-    this->close_connection(); // closing previous connection
-    
+
+    this->close_connection();  // closing previous connection
+
     connectionState_ = Attempt;
-    
+
     eventpp::counterRemover(statusListener_.callbacks())
         .append(std::bind(&SonarClient::on_first_status, this,
                             std::placeholders::_1));
@@ -178,8 +178,8 @@ void SonarClient::on_first_status(const OculusStatusMsg& msg)
         "Got Oculus status:\n"
         "- netip   : {}\n"
         "- netmask : {}\n"
-        "- temp    : {}", // overheat?
-        ip_to_string(msg.ipAddr), ip_to_string(msg.ipMask), 
+        "- temp    : {}",  // overheat?
+        ip_to_string(msg.ipAddr), ip_to_string(msg.ipMask),
         magic_enum::enum_name(
             magic_enum::enum_cast<OculusTemperatureStatusType>((msg.status & 0x0000c000) >> 14)
                 .value_or(OculusTemperatureStatusType::TempReserved)));
@@ -191,7 +191,7 @@ void SonarClient::on_first_status(const OculusStatusMsg& msg)
 
 void SonarClient::connect_callback(const boost::system::error_code& err)
 {
-    if(err) 
+    if(err)
     {
         logger->error("Connection failure : {}. Remote: {}", err.message(),
                     remote_.address().to_string());
@@ -227,9 +227,10 @@ void SonarClient::initiate_receive()
     // exactly aligned on the next header.
     static unsigned int count = 0;
     logger->trace("Initiate receive: {}", count++);
-    boost::asio::async_read(*socket_,
-                            boost::asio::buffer(reinterpret_cast<uint8_t*>(&message_->header_), sizeof(message_->header_)),
-                            std::bind(&SonarClient::header_received_callback, this, _1, _2));
+    boost::asio::async_read(
+        *socket_,
+        boost::asio::buffer(reinterpret_cast<uint8_t*>(&message_->header_), sizeof(message_->header_)),
+        std::bind(&SonarClient::header_received_callback, this, _1, _2));
 }
 
 void SonarClient::header_received_callback(const boost::system::error_code err, std::size_t receivedByteCount)
@@ -286,4 +287,4 @@ void SonarClient::data_received_callback(const boost::system::error_code err, st
     this->initiate_receive();
 }
 
-} // namespace oculus
+}  // namespace oculus

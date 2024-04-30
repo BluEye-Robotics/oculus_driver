@@ -27,12 +27,12 @@ StatusListener::StatusListener(const IoServicePtr &service,
                                uint16_t listeningPort)
     : logger(logger),
       socket_(*service),
-      remote_(boost::asio::ip::address_v4::any(), listeningPort) 
+      remote_(boost::asio::ip::address_v4::any(), listeningPort)
 {
     boost::system::error_code err;
     socket_.open(boost::asio::ip::udp::v4(), err);
 
-    //socket_.set_option(boost::asio::socket_base::broadcast(true));
+    // socket_.set_option(boost::asio::socket_base::broadcast(true));
     if(err)
         throw std::runtime_error("oculus::StatusListener : Error opening socket");
 
@@ -64,7 +64,7 @@ void StatusListener::message_callback(const boost::system::error_code& err,
         this->get_one_message();
         return;
     }
-    
+
     // we are clean here
     clock_.reset();
     prev_ = msg_;
@@ -72,4 +72,4 @@ void StatusListener::message_callback(const boost::system::error_code& err,
     this->get_one_message();
 }
 
-} //namespace oculus
+}  // namespace oculus

@@ -516,6 +516,6 @@ typedef struct
     PingParameters ping_params;
 } OculusReturnFireMessage;
 
-} // namespace oculus
+}  // namespace oculus
 
 #pragma pack(pop)

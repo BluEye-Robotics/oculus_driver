@@ -52,5 +52,5 @@ inline void oculus_to_rtac(SonarPing2D<T,VectorT>& dst,
     }
 }
 
-} //namespace types
-} //namespace rtac
+}  // namespace types
+}  // namespace rtac

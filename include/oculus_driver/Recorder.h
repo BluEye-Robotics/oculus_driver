@@ -29,14 +29,14 @@ namespace blueprint {
 // struct RmLogItem
 // {
 // public:
-//   unsigned       itemHeader;   // Fixed 4 byte header byte
-//   unsigned       sizeHeader;   // Size of this structure
-//   unsigned short type;         // Identifer for the contained data type
-//   unsigned short version;      // Version for the data type
-//   double         time;         // Time item creation
-//   unsigned short compression;  // Compression type 0 = none, 1 = qCompress
-//   unsigned       originalSize; // Size of the payload prior to any compression
-//   unsigned       payloadSize;  // Size of the following payload
+//   unsigned       itemHeader;    // Fixed 4 byte header byte
+//   unsigned       sizeHeader;    // Size of this structure
+//   unsigned short type;          // Identifer for the contained data type
+//   unsigned short version;       // Version for the data type
+//   double         time;          // Time item creation
+//   unsigned short compression;   // Compression type 0 = none, 1 = qCompress
+//   unsigned       originalSize;  // Size of the payload prior to any compression
+//   unsigned       payloadSize;   // Size of the following payload
 // };
 
 // Replacing with fixed size types to avoid discrepancies between platforms.
@@ -54,14 +54,14 @@ struct LogHeader
 
 struct LogItem
 {
-    uint32_t itemHeader;   // Fixed 4 byte header byte
-    uint32_t sizeHeader;   // Size of this structure
-    uint16_t type;         // Identifer for the contained data type
-    uint16_t version;      // Version for the data type
-    double   time;         // Time item creation
-    uint16_t compression;  // Compression type 0 = none, 1 = qCompress
-    uint32_t originalSize; // Size of the payload prior to any compression
-    uint32_t payloadSize;  // Size of the following payload
+    uint32_t itemHeader;    // Fixed 4 byte header byte
+    uint32_t sizeHeader;    // Size of this structure
+    uint16_t type;          // Identifer for the contained data type
+    uint16_t version;       // Version for the data type
+    double   time;          // Time item creation
+    uint16_t compression;   // Compression type 0 = none, 1 = qCompress
+    uint32_t originalSize;  // Size of the payload prior to any compression
+    uint32_t payloadSize;   // Size of the following payload
 };
 
 enum RecordTypes
@@ -186,8 +186,8 @@ class FileReader
     std::size_t current_item_position() const { return itemPosition_; }
     
     const blueprint::LogItem& next_item_header() const { return nextItem_; }
-    std::size_t read_next_item(uint8_t* dst) const; // data is assumed to have been reserved
-                                                    // using size given in next_item_header
+    std::size_t read_next_item(uint8_t* dst) const;  // data is assumed to have been reserved
+                                                     // using size given in next_item_header
     std::size_t jump_item() const;
 
     // These are for convenience
@@ -197,4 +197,4 @@ class FileReader
     PingMessage::ConstPtr read_next_ping()    const;
 };
 
-} // namespace oculus
+}  // namespace oculus

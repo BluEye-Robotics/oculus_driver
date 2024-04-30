@@ -294,4 +294,4 @@ inline std::pair<unsigned int, unsigned int> image_from_ping_data(
     return std::make_pair(width,height);
 }
 
-} //namespace oculus
+}  // namespace oculus

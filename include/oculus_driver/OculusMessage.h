@@ -707,6 +707,6 @@ class PingMessage
     }
 };
 
-} // namespace oculus
+}  // namespace oculus
 
 #endif //_DEF_OCULUS_DRIVER_OCULUS_MESSAGE_H_

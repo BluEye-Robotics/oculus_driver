@@ -48,7 +48,7 @@ int main()
     driver.ping_callbacks().append(&print_ping);
     driver.dummy_callbacks().append(&print_dummy);
 
-    ioService->run(); // is blocking
+    ioService->run();  // is blocking
 
     return 0;
 }

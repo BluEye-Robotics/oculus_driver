@@ -73,4 +73,4 @@ class StatusListener
     void message_callback(const boost::system::error_code& err, std::size_t bytesReceived);
 };
 
-} //namespace oculus
+}  // namespace oculus

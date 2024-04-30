@@ -137,4 +137,4 @@ class SonarClient
     inline auto& error_callbacks() { return errorCallbacks; }
 };
 
-} //namespace oculus
+}  // namespace oculus

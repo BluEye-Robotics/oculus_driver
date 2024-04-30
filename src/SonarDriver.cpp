@@ -35,7 +35,7 @@ bool SonarDriver::send_ping_config(PingConfig config)
     config.head.srcDeviceId = 0;
     config.head.dstDeviceId = sonarId_;
     config.head.payloadSize = sizeof(PingConfig) - sizeof(OculusMessageHeader);
-    config.head.msgVersion = 2; // Requesting SimpleFireResponse V2
+    config.head.msgVersion = 2;  // Requesting SimpleFireResponse V2
 
     // Other non runtime-configurable parameters (TODO : make then launch parameters)
     config.networkSpeed = 0xff;
@@ -59,8 +59,8 @@ bool SonarDriver::send_ping_config(PingConfig config)
 
     // Also saving the last pingRate which is not standby to be able to resume
     // the sonar to the last ping rate in the resume() method.
-    if(lastConfig_.pingRate != PingRateStandby) { 
-      lastPingRate_ = lastConfig_.pingRate; 
+    if(lastConfig_.pingRate != PingRateStandby) {
+      lastPingRate_ = lastConfig_.pingRate;
     }
     return true;
 }
@@ -82,7 +82,7 @@ SonarDriver::PingConfig SonarDriver::current_ping_config()
         config.head = message->header();
     };
 
-    if(!timedCallback(messageCallbacks_, configSetter)) 
+    if(!timedCallback(messageCallbacks_, configSetter))
     {
         throw TimeoutReached();
     }
@@ -91,12 +91,12 @@ SonarDriver::PingConfig SonarDriver::current_ping_config()
 
 SonarDriver::PingConfig SonarDriver::request_ping_config(PingConfig request)
 {
-    request.flags |= 0x4; // forcing sonar sending gains to true
+    request.flags |= 0x4;  // forcing sonar sending gains to true
 
     // Waiting for a ping or a dummy message to have a feedback on the config changes.
     PingConfig feedback;
     int count = 0;
-    const int maxCount = 100; // TODO make a parameter out of this
+    const int maxCount = 100;  // TODO(jp-pino) make a parameter out of this
     do
     {
         if(this->send_ping_config(request))
@@ -121,7 +121,7 @@ SonarDriver::PingConfig SonarDriver::request_ping_config(PingConfig request)
             "Could not get a proper feedback from the sonar. "
             "Assuming the configuration is ok (fix this)");
         feedback = request;
-        feedback.head.msgId = 0; // invalid, will be checkable.
+        feedback.head.msgId = 0;  // invalid, will be checkable.
     }
 
     return feedback;
@@ -169,7 +169,7 @@ void SonarDriver::handle_message(const Message::ConstPtr& message)
     {
     case MsgSimplePingResult:
         newConfig = reinterpret_cast<const PingResult*>(data.data())->fireMessage;
-        newConfig.pingRate = lastConfig_.pingRate; // feedback is broken on pingRate
+        newConfig.pingRate = lastConfig_.pingRate;  // feedback is broken on pingRate
         // When masterMode = 2, the sonar force gain between 40& and
         // 100%, BUT still needs resquested gain to be between 0%
         // and 100%. (If you request a gain=0 in masterMode=2, the
@@ -186,8 +186,8 @@ void SonarDriver::handle_message(const Message::ConstPtr& message)
         break;
     };
 
-    if(config_changed(lastConfig_, newConfig)) { 
-        configCallbacks_(lastConfig_, newConfig); 
+    if(config_changed(lastConfig_, newConfig)) {
+        configCallbacks_(lastConfig_, newConfig);
     }
     lastConfig_ = newConfig;
 
@@ -216,4 +216,4 @@ void SonarDriver::handle_message(const Message::ConstPtr& message)
     }
 }
 
-} // namespace oculus
+}  // namespace oculus

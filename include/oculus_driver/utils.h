@@ -46,7 +46,7 @@ template <typename EndPointT> inline EndPointT remote_from_status(const OculusSt
 
 inline bool header_valid(const OculusMessageHeader& header)
 {
-    return header.oculusId == 0x4f53; // Fixed for Oculus Sonar
+    return header.oculusId == 0x4f53;  // Fixed for Oculus Sonar
 }
 
 inline bool is_ping_message(const OculusMessageHeader& header)
@@ -104,7 +104,7 @@ inline bool check_config_feedback(const OculusSimpleFireMessage2& requested, con
            && requested.gammaCorrection == feedback.gammaCorrection && requested.flags == feedback.flags &&
            requested.range == feedback.range && std::abs(requested.gain - feedback.gain) < 1.0e-1)
         {
-            // return true; // bypassing checks on sound speed
+            // return true;  // bypassing checks on sound speed
             //  changing soundspeed is very slow (up to 6 seconds, maybe more)
 
             // For now simple ping is ok. Checking sound speed / salinity
@@ -162,4 +162,4 @@ bool timedCallback(eventpp::CallbackList<Prototype, Policies>& callbacks,
     return called.test();
 }
 
-} // namespace oculus
+}  // namespace oculus

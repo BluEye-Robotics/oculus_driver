@@ -1,7 +1,10 @@
 #include "oculus_message.h"
 
 #include <pybind11/pybind11.h>
+#include <pybind11/pytypes.h>
+#include <pybind11/cast.h>
 #include <pybind11/chrono.h>
+#include <pybind11/numpy.h>
 namespace py = pybind11;
 
 #include <iostream>
@@ -43,10 +46,10 @@ void init_oculus_message(py::module& m_)
         })
         .def("metadata", [](const oculus::PingMessage::ConstPtr& msg) {
             if (msg->message()->message_version() == 2) {
-                auto data = reinterpret_cast<const OculusSimplePingResult2*>(msg->data().data());
+                auto data = reinterpret_cast<const oculus::OculusSimplePingResult2*>(msg->data().data());
                 return py::cast(*data);
             } else {
-                auto data = reinterpret_cast<const OculusSimplePingResult*>(msg->data().data());
+                auto data = reinterpret_cast<const oculus::OculusSimplePingResult*>(msg->data().data());
                 return py::cast(*data);
             }
         })

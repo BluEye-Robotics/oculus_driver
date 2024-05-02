@@ -11,8 +11,7 @@ in its [README](https://github.com/ENSTABretagneRobotics/oculus_driver).
 Then install pybind11 :
 
 ```bash
-sudo apt install pybind11-dev
-pyt
+pip install "pybind11[global]"
 ```
 
 The oculus_python package can then be installed using pip :
@@ -30,7 +29,5 @@ Some example scripts can be found in the example directory.
 This is a work in progress. Feedback would be appreciated.
 
 A web-based graphical interface can be found
-[here](://github.com/pnarvor/oculus_gui). (Also a work in
+[here](http://github.com/pnarvor/oculus_gui). (Also a work in
 progress. Need some knowledge of django to be used).
-
-

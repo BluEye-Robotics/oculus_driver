@@ -2,6 +2,10 @@
 #define _DEF_OCULUS_DRIVER_PYBIND11_UTILS_H_
 
 #include <pybind11/pybind11.h>
+#include <pybind11/pytypes.h>
+#include <pybind11/stl.h>
+#include <pybind11/numpy.h>
+#include <pybind11/cast.h>
 namespace py = pybind11;
 
 #include <vector>
@@ -101,8 +105,3 @@ inline py::memoryview make_ping_data_view(const oculus::PingMessage& msg)
 }
 
 #endif //_DEF_OCULUS_DRIVER_PYBIND11_UTILS_H_
-
-
-
-
-

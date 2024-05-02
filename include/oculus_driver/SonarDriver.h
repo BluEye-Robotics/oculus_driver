@@ -44,6 +44,11 @@ class SonarDriver : public SonarClient
     using TimeSource = SonarClient::TimeSource;
     using TimePoint  = typename std::invoke_result<decltype(&TimeSource::now)>::type;
 
+    using MessageCallbacksType = eventpp::CallbackList<void(const Message::ConstPtr&)>;
+    using PingCallbacksType = eventpp::CallbackList<void(const PingMessage::ConstPtr)>;
+    using DummyCallbacksType = eventpp::CallbackList<void(const OculusMessageHeader&)>;
+    using ConfigCallbacksType = eventpp::CallbackList<void(const PingConfig&, const PingConfig&)>;
+
     private:
     std::shared_ptr<spdlog::logger> logger;
 
@@ -53,11 +58,10 @@ class SonarDriver : public SonarClient
 
     // message callbacks will be called on every received message.
     // config callbacks will be called on (detectable) configuration changes.
-    eventpp::CallbackList<void(const Message::ConstPtr&)> messageCallbacks_;
-    eventpp::CallbackList<void(const PingMessage::ConstPtr)> pingCallbacks_;
-    eventpp::CallbackList<void(const OculusMessageHeader&)> dummyCallbacks_;
-    eventpp::CallbackList<void(const PingConfig&, const PingConfig&)>
-        configCallbacks_;
+    MessageCallbacksType messageCallbacks_;
+    PingCallbacksType pingCallbacks_;
+    DummyCallbacksType dummyCallbacks_;
+    ConfigCallbacksType configCallbacks_;
 
     public:
 

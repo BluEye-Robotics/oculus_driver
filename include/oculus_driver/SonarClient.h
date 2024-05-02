@@ -70,6 +70,9 @@ class SonarClient
 
     using TimeSource = Message::TimeSource;
     using TimePoint  = Message::TimePoint;
+    
+    using ErrorCallbacksType = eventpp::CallbackList<void(const boost::system::error_code&)>;
+    using ConnectCallbacksType = eventpp::CallbackList<void()>;
 
     private:
     const std::shared_ptr<spdlog::logger> logger;
@@ -89,8 +92,8 @@ class SonarClient
     Clock                        clock_;
     
     StatusListener statusListener_;
-    eventpp::CallbackList<void(const boost::system::error_code&)> errorCallbacks;
-    eventpp::CallbackList<void()> connectCallbacks;
+    ErrorCallbacksType errorCallbacks;
+    ConnectCallbacksType connectCallbacks;
     
 
     Message::Ptr message_;

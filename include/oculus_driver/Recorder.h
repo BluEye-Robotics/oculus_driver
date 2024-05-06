@@ -111,7 +111,11 @@ class Recorder
 
         Message::TimePoint to_sonar_stamp() const {
             uint64_t nanos = 1000000000*this->seconds + this->nanoseconds;
-            return Message::TimePoint(std::chrono::nanoseconds(nanos));
+            return Message::TimePoint{
+                std::chrono::duration_cast<Message::TimePoint::duration>(
+                    std::chrono::nanoseconds(nanos)
+                )
+            };
         }
 
         TimeStamp& operator=(const Message::TimePoint& stamp) {

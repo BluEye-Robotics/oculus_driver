@@ -29,12 +29,6 @@ add_definitions(-DSPDLOG_FMT_EXTERNAL=on)
 
 message(STATUS "BUILD_TESTS: ${BUILD_TESTS}")
 
-get_cmake_property(_variableNames VARIABLES)
-list (SORT _variableNames)
-foreach (_variableName ${_variableNames})
-    message(STATUS "${_variableName}=${${_variableName}}")
-endforeach()
-
 set(EXT_LIBS
     Boost::system
     Boost::thread
@@ -50,6 +44,8 @@ set(EXT_LIB_DIRS
     ${magic_enum_INCLUDE_DIRS}
     ${FMT_LIBRARY_DIRS}
 )
+message(STATUS "EXT_LIB_DIRS: ${EXT_LIB_DIRS}")
+message(STATUS "EXT_LIBS: ${EXT_LIBS}")
 
 add_library(oculus_driver SHARED
     src/AsyncService.cpp

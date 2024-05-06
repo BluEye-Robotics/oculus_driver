@@ -235,7 +235,11 @@ Message::ConstPtr FileReader::read_next_message() const
         message_->timestamp_ = stamp.to_sonar_stamp();
     } else {
         uint64_t nanos = 1000000000*nextItemDate;
-        message_->timestamp_ = Message::TimePoint(std::chrono::nanoseconds(nanos));
+        message_->timestamp_ = Message::TimePoint{
+            std::chrono::duration_cast<Message::TimePoint::duration>(
+                std::chrono::nanoseconds(nanos)
+            )
+        };
     }
 
     return message_;

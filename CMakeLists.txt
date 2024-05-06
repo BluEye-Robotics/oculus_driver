@@ -18,18 +18,27 @@ if("${SPDLOG_LIBRARIES}" STREQUAL "")
 endif()
 
 find_package(eventpp CONFIG REQUIRED)
-find_package(magic_enum REQUIRED)
+find_package(magic_enum CONFIG REQUIRED)
+if("${magic_enum_LIBRARIES}" STREQUAL "")
+  set(magic_enum_LIBRARIES magic_enum::magic_enum)
+endif()
+
 
 add_definitions(-DSPDLOG_COMPILED_LIB)
 add_definitions(-DSPDLOG_FMT_EXTERNAL=on)
 
 message(STATUS "BUILD_TESTS: ${BUILD_TESTS}")
 
-
+get_cmake_property(_variableNames VARIABLES)
+list (SORT _variableNames)
+foreach (_variableName ${_variableNames})
+    message(STATUS "${_variableName}=${${_variableName}}")
+endforeach()
 
 set(EXT_LIBS
     Boost::system
     Boost::thread
+    ${magic_enum_LIBRARIES}
     ${SPDLOG_LIBRARIES}
     ${FMT_LIBRARIES}
 )
@@ -39,6 +48,7 @@ set(EXT_LIB_DIRS
     $<INSTALL_INTERFACE:include>
     ${EVENTPP_INCLUDE_DIR}
     ${magic_enum_INCLUDE_DIRS}
+    ${FMT_LIBRARY_DIRS}
 )
 
 add_library(oculus_driver SHARED

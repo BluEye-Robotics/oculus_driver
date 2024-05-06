@@ -1,0 +1,36 @@
+name: compile_macos
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: macos-14
+
+    steps:
+      - name: Install Packages
+        run: brew install boost boost-python3 eigen jsoncpp spdlog protobuf nlohmann-json curlpp libmodbus libpcap pkg-config jq geographiclib zstd zeromq
+
+      # eventpp
+      - name: Build and install eventpp
+        uses: jp-pino/cached-checkout-build-action@v1
+        with:
+          repository: wqking/eventpp
+          ref: master
+
+      # magic_enum
+      - name: Build and install magic_enum
+        uses: jp-pino/cached-checkout-build-action@v1
+        with:
+          repository: Neargye/magic_enum
+          ref: master
+
+      # oculus_driver
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          path: oculus_driver
+      - name: Build
+        run: |
+          cd $GITHUB_WORKSPACE/oculus_driver/ && mkdir build && cd build
+          cmake ..
+          make

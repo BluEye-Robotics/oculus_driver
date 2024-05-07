@@ -28,7 +28,7 @@ endif()
 
 
 add_definitions(-DSPDLOG_COMPILED_LIB)
-add_definitions(-DSPDLOG_FMT_EXTERNAL=on)
+add_definitions(-DSPDLOG_FMT_EXTERNAL=1)
 
 message(STATUS "BUILD_TESTS: ${BUILD_TESTS}")
 

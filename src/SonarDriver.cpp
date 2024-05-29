@@ -175,15 +175,16 @@ void SonarDriver::handle_message(const Message::ConstPtr& message)
         newConfig = reinterpret_cast<const PingResult*>(data.data())->fireMessage;
         // feedback is broken on pingRate
         newConfig.pingRate = lastConfig_.pingRate;
+        // Apparently this is not needed anymore!!
         // When masterMode = 2, the sonar force gain between 40& and
         // 100%, BUT still needs resquested gain to be between 0%
         // and 100%. (If you request a gain=0 in masterMode=2, the
         // fireMessage in the ping results will be 40%). The gain is
         // rescaled here to ensure consistent parameter handling on client
         // side).
-        if (newConfig.masterMode == 2) {
-            newConfig.gain = (newConfig.gain - 40.0) * 100.0 / 60.0;
-        }
+        // if (newConfig.masterMode == 2) {
+        //     newConfig.gain = (newConfig.gain - 40.0) * 100.0 / 60.0;
+        // }
         break;
     case MsgDummy:
         logger->trace("Dummy message received. Changing ping rate to standby");

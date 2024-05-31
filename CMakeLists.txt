@@ -16,16 +16,17 @@ message(STATUS "FMT_LIBRARIES = ${FMT_LIBRARIES}")
 
 find_package(spdlog REQUIRED)
 set(SPDLOG_LIB spdlog::spdlog)
+
 if("${SPDLOG_LIBRARIES}" STREQUAL "")
-  set(SPDLOG_LIBRARIES spdlog::spdlog)
+    set(SPDLOG_LIBRARIES spdlog::spdlog)
 endif()
 
 find_package(eventpp CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)
-if("${magic_enum_LIBRARIES}" STREQUAL "")
-  set(magic_enum_LIBRARIES magic_enum::magic_enum)
-endif()
 
+if("${magic_enum_LIBRARIES}" STREQUAL "")
+    set(magic_enum_LIBRARIES magic_enum::magic_enum)
+endif()
 
 add_definitions(-DSPDLOG_COMPILED_LIB)
 add_definitions(-DSPDLOG_FMT_EXTERNAL=1)
@@ -64,28 +65,20 @@ target_link_directories(oculus_driver PUBLIC ${EXT_LIB_DIRS})
 target_link_libraries(oculus_driver PUBLIC ${EXT_LIBS})
 target_compile_definitions(oculus_driver PUBLIC MAGIC_ENUM_RANGE_MAX=1024)
 
-#############
-## Install ##
-#############
+# ############
+# # Install ##
+# ############
 include(GNUInstallDirs)
 
 install(DIRECTORY include/oculus_driver
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 install(TARGETS ${PROJECT_NAME}
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        EXPORT ${PROJECT_NAME}Targets)
+    DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-# install the exported targets
-install(EXPORT ${PROJECT_NAME}Targets
-    FILE ${PROJECT_NAME}Targets.cmake
-    # NAMESPACE ${PROJECT_NAME}:: # namespacing does not play well with fetch content
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-)
-
-############
-## Config ##
-############
+# ###########
+# # Config ##
+# ###########
 set(INCLUDE_INSTALL_DIR include)
 set(LIB_INSTALL_DIR lib)
 
@@ -104,10 +97,6 @@ install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
     DESTINATION lib/cmake/${PROJECT_NAME}
-)
-export(EXPORT ${PROJECT_NAME}Targets
-    # NAMESPACE ${PROJECT_NAME}:: # namespacing does not play well with fetch content
-    FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake"
 )
 
 if(BUILD_TESTS)

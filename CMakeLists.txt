@@ -65,7 +65,6 @@ set_target_properties(oculus_driver PROPERTIES
 target_include_directories(oculus_driver PUBLIC ${EXT_LIB_DIRS})
 target_link_directories(oculus_driver PUBLIC ${EXT_LIB_DIRS})
 target_link_libraries(oculus_driver PUBLIC ${EXT_LIBS})
-target_compile_features(oculus_driver PUBLIC cxx_std_17)
 target_compile_definitions(oculus_driver PUBLIC MAGIC_ENUM_RANGE_MAX=1024)
 
 #############

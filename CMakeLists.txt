@@ -90,11 +90,14 @@ install(EXPORT ${PROJECT_NAME}Targets
 ############
 ## Config ##
 ############
+set(INCLUDE_INSTALL_DIR include)
+set(LIB_INSTALL_DIR lib)
+
 include(CMakePackageConfigHelpers)
 configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake.in
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
     INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
-    PATH_VARS CMAKE_INSTALL_INCLUDEDIR CMAKE_INSTALL_LIBDIR
+    PATH_VARS INCLUDE_INSTALL_DIR LIB_INSTALL_DIR
 )
 write_basic_package_version_file(
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"

@@ -58,10 +58,7 @@ add_library(oculus_driver SHARED
     src/SonarDriver.cpp
     src/StatusListener.cpp
 )
-set_target_properties(oculus_driver PROPERTIES
-    PUBLIC_HEADER "${oculus_driver_headers}"
-    INSTALL_RPATH_USE_LINK_PATH True
-)
+
 target_include_directories(oculus_driver PUBLIC ${EXT_LIB_DIRS})
 target_link_directories(oculus_driver PUBLIC ${EXT_LIB_DIRS})
 target_link_libraries(oculus_driver PUBLIC ${EXT_LIBS})
